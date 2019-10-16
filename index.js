@@ -1,13 +1,27 @@
+// --- Library
 const express = require('express')
+const WebSocket = require('ws')
+
+// --- Const
+const PORT = 8080
+
+// --- int express
 const app = express()
-const port = 3000
 
 app.use('/', express.static('public'))
 
-const Game = require('./app/backend/class/game.class');
+app.listen(PORT, () => { })
 
-let game1 = new Game({})
+// --- init websocket
 
-console.log(game1)
+let wss = new WebSocket.Server({
+    port: PORT + 1,
+    perMessageDeflate: false
+})
 
-app.listen(port, () => {})
+// --- websocket route
+wss.on('connection', (ws)=> {
+    ws.on('message', (msg)=> {
+        
+    })
+})

@@ -1,5 +1,3 @@
-const STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED" }
-
 /**
  * Will init a two dim array representing a board with the value
  * passed in param
@@ -22,9 +20,12 @@ const initABoard = (x, y, value = -1) => {
 
 
 module.exports = class {
-    constructor(player) {
+    STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED" }
+
+    constructor(id, player) {
+        this.id = id
         this.players = [player]
-        this.state = STATE.CREATED
+        this.state = this.STATE.CREATED
 
         this.firstToPlay = Math.round(Math.random())
         this.playerTurn = this.firstToPlay
