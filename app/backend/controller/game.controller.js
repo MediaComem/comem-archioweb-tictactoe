@@ -1,8 +1,10 @@
-const Game = require('../class/game.class')
+const Game = require('../../class/game.class')
+const Controller = require('../../class/controller.class')
 
 
-module.exports = class {
+module.exports = class extends Controller {
     constructor() {
+        super('game')
         this.games = Array()
     }
 
@@ -11,16 +13,17 @@ module.exports = class {
      * @param {*} player 
      */
     createNewGame(player) {
-        let newGame = new Game(this.games.length+1, player)
+        let newGame = new Game(this.games.length + 1, player)
         this.games.push(newGame)
-        return newGame
+
+        return this.sendOK(newGame, 'newGame')
     }
 
     /**
      * Get all joinable game
      */
     getJoinableGame() {
-        return this.games.filter((game) => game.state == Game.STATE.CREATED)
+        return  this.sendOK(this.games.filter((game) => game.state == Game.STATE.CREATED), 'joinableGames')
     }
 
     /**
@@ -28,9 +31,9 @@ module.exports = class {
      * @param {*} player 
      * @param {*} gameId 
      */
-    joinGame(player, gameId){
-        let gameToJoin = this.games.find((game)=> game.id===gameId)
+    joinGame(player, gameId) {
+        let gameToJoin = this.games.find((game) => game.id === gameId)
         gameToJoin.players.push(player)
-        return gameToJoin
+        return this.sendOK(gameToJoin, 'joinningGame')
     }
 }

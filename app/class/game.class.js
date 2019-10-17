@@ -20,12 +20,12 @@ const initABoard = (x, y, value = -1) => {
 
 
 module.exports = class {
-    STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED" }
+    static STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED" }
 
     constructor(id, player) {
         this.id = id
         this.players = [player]
-        this.state = this.STATE.CREATED
+        this.state = this.constructor.STATE.CREATED
 
         this.firstToPlay = Math.round(Math.random())
         this.playerTurn = this.firstToPlay
