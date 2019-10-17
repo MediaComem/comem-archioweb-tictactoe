@@ -5,17 +5,26 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "frontend-build":"npx webpack --watch"
+    "start": "nodemon --ignore app/frontend/ index.js ",
+    "frontend-build": "npx webpack --watch"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "arthur.verdon@heig-vd.ch",
+  "license": "MIT",
   "dependencies": {
+    "bootstrap": "^4.3.1",
     "express": "^4.17.1",
+    "jquery": "^3.4.1",
     "ws": "^7.1.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "node-sass": "^4.12.0",
     "nodemon": "^1.19.4",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9"
   }

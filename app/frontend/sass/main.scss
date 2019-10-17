@@ -1,0 +1,85 @@
+@import "~bootstrap/scss/bootstrap";
+
+body {
+  div.showgame-container {
+    header {
+      margin-top: 5%;
+    }
+
+    main {
+      .games {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+
+        .joinable-game {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-content: center;
+          border: 1px solid lightgrey;
+          border-radius: 5px;
+          padding: 5% 1%;
+          width: 90%;
+
+          .body {
+            width: 50%;
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+
+            div {
+              height: 100%;
+              margin-right: 5px;
+              display: flex;
+              justify-content: center;
+              flex-direction: column;
+            }
+
+            //border-right: 2px solid grey;
+          }
+          .join {
+            //padding-left:1%;
+          }
+        }
+      }
+    }
+  }
+
+  div.creategame-container {
+    .player-1 {
+      color: red;
+    }
+    .player-2 {
+      color: blue;
+    }
+
+    main {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      padding-top:10px;
+
+      .board {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        grid-gap: 5px;
+
+        width: 70vw;
+        height: 70vw;
+
+        background: lightgrey;
+
+        .board-btn {
+          width: 100%;
+          height: 100%;
+          background: white;
+          border:none;
+          font-size: 80%;
+        }
+      }
+    }
+  }
+}

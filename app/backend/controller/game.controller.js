@@ -8,32 +8,38 @@ module.exports = class extends Controller {
         this.games = Array()
     }
 
-    /**
-     * Will instance a new game
-     * @param {*} player 
-     */
-    createNewGame(player) {
+    createNewGame(ws, player) {
         let newGame = new Game(this.games.length + 1, player)
         this.games.push(newGame)
 
-        return this.sendOK(newGame, 'newGame')
+        ws.send(this.sendOK(newGame, 'newGame'))
     }
 
-    /**
-     * Get all joinable game
-     */
-    getJoinableGame() {
-        return  this.sendOK(this.games.filter((game) => game.state == Game.STATE.CREATED), 'joinableGames')
+    getJoinableGame(ws) {
+        ws.send( this.sendOK(this.games.filter((game) => game.state == Game.STATE.CREATED), 'joinableGames'))
     }
 
-    /**
-     * 
-     * @param {*} player 
-     * @param {*} gameId 
-     */
-    joinGame(player, gameId) {
+    joinGame(ws, player, gameId) {
         let gameToJoin = this.games.find((game) => game.id === gameId)
         gameToJoin.players.push(player)
-        return this.sendOK(gameToJoin, 'joinningGame')
+        ws.send(this.sendOK(gameToJoin, 'joinningGame'))
+    }
+
+    updateBoardRequest(ws, gameId ,row, col) {
+        let game = this.games.find(game => game.id==gameid)
+
+        if(!game){
+            ws.send(this.WS_MESSAGE.sendError('No game found for id : '+gameId, this.WS_MESSAGE.PROTOCOL_CODE[400]))
+            return
+        }
+
+        console.log("Game found",game)
+
+        if(game.isCellEmpty(row,col)){
+            
+            ws.send(this.sendOK({row, col},'updateBoard'))
+        }else{
+            ws.send(this.sendOK('','invalidMove'))
+        }
     }
 }

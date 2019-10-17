@@ -31,4 +31,8 @@ module.exports = class {
         this.playerTurn = this.firstToPlay
         this.board = initABoard(3, 3, -1)
     }
+
+    isCellEmpty(row,col) {
+        return this.board[row][col] === -1
+    }
 }

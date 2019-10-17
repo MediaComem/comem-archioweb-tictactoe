@@ -1,14 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>TIC-TAC-TOE</title>
 </head>
+
 <body>
-    
+
+    <!-- SHOW GAME CONTAINER -->
+    <div class="container showgame-container">
+        <header>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Filter" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="btn-search">Search</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="games">
+                <div class="tmp joinable-game">
+                    <div class="body">
+                        <div class="playerid">#1</div>
+                        <div class="playername">
+                            Player
+                        </div>
+                    </div>
+                    <div class="join">
+                        <button class="btn btn-primary">Join Game</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <footer>
+            <nav class="navbar fixed-bottom navbar-light bg-light">
+                <span class="navbar-text">
+                    <button class="btn btn-outline-dark" id="createNewGame">+ Create Game</button>
+                </span>
+            </nav>
+        </footer>
+    </div>
+
+    <!-- CREATE GAME CONTAINER -->
+    <div class="creategame-container">
+        <header>
+            <nav class="navbar navbar-light bg-light">
+                <button class="btn btn-danger">Exit Game</button>
+            </nav>
+        </header>
+
+        <main>
+            <div class="board">
+                <button class="tmp board-btn player-1">-</button>
+            </div>
+        </main>
+    </div>
 </body>
 
 <script src="./js/build.js"></script>
+
 </html>
