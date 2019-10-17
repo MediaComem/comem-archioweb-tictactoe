@@ -13,3 +13,8 @@ npm start
 
 Visit localhost:8080, Websocket API is running on localhost:8081
 To automatically reload the code, use npm run nodemon instead of npm start.
+
+## Resources
+TODO
+
+## Todo
