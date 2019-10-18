@@ -8,11 +8,12 @@ module.exports = class extends Controller {
     }
 
     createNewGame(ws, player) {
-        let newGame = new Game(this.games.length + 1, player)
+        let newGame = new Game(this.gameManager.games.length + 1, player)
         this.gameManager.addGame(newGame)
+
         this.gameManager.players.forEach(p => {
             if(p.id !== player.id){
-                this.sendResourceMessage('newJoinableGame',newGame, p.ws)
+                this.sendResourceMessage('newJoinableGame',newGame, p.websocket)
             }
         })
         this.sendResourceMessage('displayNewGame', newGame, ws)

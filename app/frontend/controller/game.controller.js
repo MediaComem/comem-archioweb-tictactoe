@@ -47,7 +47,7 @@ module.exports = class extends Controller {
         alert("you're move is invalid")
     }
 
-    newJoinableGame(newGame) {
+    newJoinableGame(ws, newGame) {
         this.viewManger.addNewJoinableGame(newGame)
     }
 }

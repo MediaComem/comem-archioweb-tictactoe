@@ -15,14 +15,16 @@ let ws = new WebSocket(WS_URL)
 ws.onopen = (e) => {
     console.log("=== CONNECTION OPEN WITH WEBSOCKET ===")
 
+
+    // ---------------- INIT DISPATCHER
+    let wsFrontendDispatcher = new WSFrontendDispatcher()
+
     // ---------------- INIT VIEW MANAGER
-    let viewManager = new ViewManager(ws)
+    let viewManager = new ViewManager(ws, wsFrontendDispatcher)
 
-
-    let wsFrontendDispatcher = new WSFrontendDispatcher(
-        new GameController(viewManager), 
-        new PlayerController(viewManager))
-
+    // ---------------- ADD ROUTE
+    wsFrontendDispatcher.addRoute('game', new GameController(viewManager))
+    wsFrontendDispatcher.addRoute('player', new PlayerController(viewManager))
 
 
     ws.onmessage = (msg) => {

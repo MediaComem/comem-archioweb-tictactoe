@@ -5,7 +5,7 @@ const GameManager = require('../class/game-manager.class')
 
 module.exports = class extends WSDispatcher{
     
-    initRouteController(){
+    initRoute(){
         let gameManager = new GameManager()        
 
         return {

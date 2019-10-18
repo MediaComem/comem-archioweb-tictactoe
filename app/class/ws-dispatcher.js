@@ -4,12 +4,16 @@ const WSMessage = require('./ws-message')
 module.exports = class {
 
     constructor() {
-        this.route = this.initRouteController()
+        this.route = this.initRoute()
     }
 
 
-    initRouteController() {
+    initRoute() {
         return {}
+    }
+
+    addRoute(routeName, routeController){
+        this.route[routeName] = routeController
     }
 
     checkMsgValidity(msg) {

@@ -2,7 +2,7 @@ const WSMessage = require('./ws-message')
 
 
 module.exports = class {
-    constructor(resourceName,) {
+    constructor(resourceName) {
         this.RESOURCE_NAME = resourceName
     }
 

@@ -1,6 +1,10 @@
+const WSMessage = require('../class/ws-message')
+
+
 module.exports = class {
-    constructor(websocket) {
+    constructor(websocket, wsFrontendDispatcher) {
         this.websocket = websocket
+        this.wsFrontendDispatcher = wsFrontendDispatcher
 
         this.initMainComponent()
         this.initTemplateManager()
@@ -29,9 +33,7 @@ module.exports = class {
 
     initEventManager() {
         $('#createNewGame').on('click', (evt) => {
-            showgameContainer.toggle()
-
-            wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+            this.wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
                 'game',
                 'createGame',
                 []
@@ -51,6 +53,7 @@ module.exports = class {
             })
         })
 
+        this.showgameContainer.hide()
         this.creategameContainer.show()
     }
 
@@ -60,8 +63,8 @@ module.exports = class {
 
     addNewJoinableGame(game) {
         let joinableGame = this.TMP_JOINABLE_GAME.clone()
-        $(".playerId", joinableGame).text(game.player.id)
-        $(".playername", joinableGame).text(game.player.username)
+        $(".playerId", joinableGame).text(game.players[0].id)
+        $(".playername", joinableGame).text(game.players[0].username)
         this.showgameContainer.append(joinableGame)
     }
 }
