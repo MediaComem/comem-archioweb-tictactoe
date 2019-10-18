@@ -23,4 +23,8 @@ module.exports = class {
     findGameById(gameId) {
         return this.games.find((game) => game.id === gameId)
     }
+
+    findPlayerById(playerId) {
+        return this.players.find((player) => player.id === playerId)
+    }
 }

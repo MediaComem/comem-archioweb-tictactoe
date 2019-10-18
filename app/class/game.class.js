@@ -37,27 +37,37 @@ module.exports = class {
     }
 
     getPlayerIcon(playerId) {
-        return this.constructor.PLAYERS_ICON[this.players.indexOf(player => player.id === playerId)]
+        return this.constructor.PLAYERS_ICON[this.players.findIndex(player => player.id === playerId)+1]
     }
 
     isCellEmpty(row, col) {
         return this.board[row][col] === -1
     }
 
-    checkIfPlayerCanPlay(playerId) {
+    canPlay(playerId) {
         return this.players[this.playerTurn - 1].id === playerId
     }
 
+    addNewPlayer(player) {
+        if (this.players.length >= this.MAX_PLAYER) {
+            return false
+        }
+
+        this.players.push(player)
+
+        return true
+    }
+
     play(row, col, playerId) {
-        if (this.state !== this.STATE.RUNNING) {
+        if (this.state !== this.constructor.STATE.RUNNING) {
             return false
         }
 
-        if (!this.isCellEmpty(row, col) || !this.checkIfPlayerCanPlay(row, col, playerId)) {
+        if (!this.isCellEmpty(row, col) || !this.canPlay(playerId)) {
             return false
         }
 
-        this.board[row, col] = this.players[this.playerTurn - 1].id
+        this.board[row][col] = this.players[this.playerTurn - 1].id
 
         this.playerTurn = this.playerTurn >= this.constructor.MAX_PLAYER ? 1 : this.playerTurn + 1
 

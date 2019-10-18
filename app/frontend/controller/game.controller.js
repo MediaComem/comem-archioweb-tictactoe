@@ -18,12 +18,10 @@ module.exports = class extends Controller {
         this.sendResourceMessage('createNewGame', player, ws)
     }
 
-    displayNewGame(ws, res) {
-        LCS_MANAGER.save('game', res)
+    displayNewGame(ws, game) {
+        LCS_MANAGER.save('game', game)
 
-        this.viewManger.displayNewGame(res.board, (evt) => {
-            this.updateBoardRequest(ws, i, j)
-        })
+        this.viewManger.displayNewGame(game.board)
 
     }
 
@@ -36,18 +34,23 @@ module.exports = class extends Controller {
             return
         }
 
-        this.sendResourceMessage('updateBoardRequest', [player.id, game.id, row, col], ws)
+        this.sendResourceMessage('updateBoardRequest', [game.id, player.id ,row, col], ws)
     }
 
-    updateBoard(ws, res) {
-        this.viewManger.updateBoard(res.row,res.col,res.icon)
+    updateBoard(ws, row, col, icon) {
+        this.viewManger.updateBoard(row,col,icon)
     }
 
-    invalidMove(ws, res) {
+    invalidMove(ws, pos) {
         alert("you're move is invalid")
     }
 
     newJoinableGame(ws, newGame) {
         this.viewManger.addNewJoinableGame(newGame)
+    }
+
+    requestJoinGame(ws, gameId) {
+        let player = LCS_MANAGER.load('player')
+        this.sendResourceMessage('requestJoinGame', [gameId, player.id], ws)
     }
 }

@@ -17,7 +17,7 @@ module.exports = class {
 
         this.creategameContainer = $('.creategame-container')
 
-        this.BOARD_GRID = $(".board")
+        this.BOARD_GRID = $('.board')
 
         this.btnCreateNewGame = $('#createNewGame')
         this.btnCreateNewGame.attr('disabled')
@@ -41,13 +41,19 @@ module.exports = class {
         })
     }
 
-    displayNewGame(board, btnEvtFunc) {
+    displayNewGame(board) {
 
         board.forEach((row, i) => {
             row.forEach((col, j) => {
                 let boardBtn = this.TMP_BOARD_BTN.clone()
 
-                boardBtn.on('click', btnEvtFunc)
+                boardBtn.on('click', (evt) => {
+                    this.wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+                        'game',
+                        'updateBoardRequest',
+                        [i, j]
+                    ), this.websocket)
+                })
 
                 this.BOARD_GRID.append(boardBtn)
             })
@@ -63,8 +69,19 @@ module.exports = class {
 
     addNewJoinableGame(game) {
         let joinableGame = this.TMP_JOINABLE_GAME.clone()
-        $(".playerId", joinableGame).text(game.players[0].id)
-        $(".playername", joinableGame).text(game.players[0].username)
+
+        $('.playerId', joinableGame).text(game.players[0].id)
+        $('.playername', joinableGame).text(game.players[0].username)
+
+        $('.join-btn', joinableGame).on('click', (e) => {
+            this.wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+                'game',
+                'requestJoinGame',
+                [game.id]
+            ), this.websocket)
+        })
+
+
         this.showgameContainer.append(joinableGame)
     }
 }

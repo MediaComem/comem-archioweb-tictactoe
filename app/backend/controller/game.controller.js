@@ -12,8 +12,8 @@ module.exports = class extends Controller {
         this.gameManager.addGame(newGame)
 
         this.gameManager.players.forEach(p => {
-            if(p.id !== player.id){
-                this.sendResourceMessage('newJoinableGame',newGame, p.websocket)
+            if (p.id !== player.id) {
+                this.sendResourceMessage('newJoinableGame', newGame, p.websocket)
             }
         })
         this.sendResourceMessage('displayNewGame', newGame, ws)
@@ -23,13 +23,7 @@ module.exports = class extends Controller {
         this.sendResourceMessage('displayJoinableGame', this.gameManager.getAllCreatedGames(), ws)
     }
 
-    joinGame(ws, player, gameId) {
-        let gameToJoin = this.gameManager.findGameById(gameId)
-        gameToJoin.players.push(player)
-        this.sendResourceMessage(gameToJoin, 'joinningGame', ws)
-    }
-
-    updateBoardRequest(ws, gameId, playerId ,row, col) {
+    updateBoardRequest(ws, gameId, playerId, row, col) {
         let game = this.gameManager.findGameById(gameId)
 
         if (!game) {
@@ -37,13 +31,31 @@ module.exports = class extends Controller {
             return
         }
 
-        console.log("Game found", game)
-
         if (game.play(row, col, playerId)) {
             let icon = game.getPlayerIcon(playerId)
-            this.sendResourceMessage('updateBoard', { row, col, icon }, ws)
+
+            game.players.forEach((player) => {
+                let playerWS = this.gameManager.findPlayerById(player.id).websocket
+
+                this.sendResourceMessage('updateBoard', [row, col, icon ], playerWS)
+            })
+
         } else {
-            this.sendResourceMessage('invalidMove', ws)
+            this.sendResourceMessage('invalidMove', [], ws)
         }
+    }
+
+    requestJoinGame(ws, gameId, playerId) {
+        let game = this.gameManager.findGameById(gameId)
+        let player = this.gameManager.findPlayerById(playerId)
+
+        if (game.addNewPlayer(player)) {
+            game.state = Game.STATE.RUNNING
+
+            this.sendResourceMessage('displayNewGame', [game], ws)
+        } else {
+            this.sendResourceMessage('invalidGame', [], ws)
+        }
+
     }
 }
