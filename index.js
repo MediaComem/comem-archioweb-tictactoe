@@ -37,3 +37,4 @@ wss.on('connection', (ws) => {
         wsBackendDispatcher.dispatchFromMsg(msg, ws)
     })
 })
+

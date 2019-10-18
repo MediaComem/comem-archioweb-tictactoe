@@ -3,11 +3,9 @@ const LCS_MANAGER = require('../localstorage-manager')
 
 
 module.exports = class extends Controller {
-    constructor(boardContainer) {
+    constructor(viewManger) {
         super('game')
-        this.boardContainer = boardContainer
-        this.TMP_BOARD_BTN = $('.tmp.board-btn', boardContainer).remove().removeClass('tmp').clone()
-        this.BOARD_GRID = $(".board")
+        this.viewManger = viewManger
     }
 
     createGame(ws) {
@@ -23,19 +21,10 @@ module.exports = class extends Controller {
     displayNewGame(ws, res) {
         LCS_MANAGER.save('game', res)
 
-        res.board.forEach((row, i) => {
-            row.forEach((col, j) => {
-                let boardBtn = this.TMP_BOARD_BTN.clone()
-
-                boardBtn.on('click', (evt) => {
-                    this.updateBoardRequest(ws, i, j)
-                })
-
-                this.BOARD_GRID.append(boardBtn)
-            })
+        this.viewManger.displayNewGame(res.board, (evt) => {
+            this.updateBoardRequest(ws, i, j)
         })
 
-        this.boardContainer.show()
     }
 
     updateBoardRequest(ws, row, col) {
@@ -51,10 +40,14 @@ module.exports = class extends Controller {
     }
 
     updateBoard(ws, res) {
-        this.BOARD_GRID.children().eq(res.row * 3 + res.col).text(res.icon)
+        this.viewManger.updateBoard(res.row,res.col,res.icon)
     }
 
     invalidMove(ws, res) {
         alert("you're move is invalid")
+    }
+
+    newJoinableGame(newGame) {
+        this.viewManger.addNewJoinableGame(newGame)
     }
 }

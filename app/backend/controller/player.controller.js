@@ -3,14 +3,14 @@ const Player = require('../../class/player.class')
 
 
 module.exports = class extends Controller {
-    constructor() {
+    constructor(gameManager) {
         super('player')
-        this.players = []
+        this.gameManager = gameManager
     }
 
     createPlayer(ws) {
-        let newPlayer = new Player(this.players.length + 1, "No Name", ws)
-        this.players.push(newPlayer)
+        let newPlayer = new Player(this.gameManager.players.length + 1, "No Name", ws)
+        this.gameManager.addPlayer(newPlayer)
         this.sendResourceMessage('receiveMyPlayer', newPlayer.getWithoutWS(), ws)
     }
 }

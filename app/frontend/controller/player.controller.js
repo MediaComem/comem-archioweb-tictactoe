@@ -4,8 +4,9 @@ const LCS_MANAGER = require('../localstorage-manager')
 
 
 module.exports = class extends Controller {
-    constructor() {
+    constructor(viewManger) {
         super('player')
+        this.viewManger = viewManger
     }
 
 
