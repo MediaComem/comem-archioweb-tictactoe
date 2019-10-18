@@ -53,4 +53,8 @@ module.exports = class extends Controller {
         let player = LCS_MANAGER.load('player')
         this.sendResourceMessage('requestJoinGame', [gameId, player.id], ws)
     }
+
+    winMove(ws, playerId, icon) {
+        alert(`${icon} win.`)
+    }
 }

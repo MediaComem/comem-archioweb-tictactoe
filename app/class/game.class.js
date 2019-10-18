@@ -20,12 +20,15 @@ const initABoard = (x, y, value = -1) => {
 
 
 module.exports = class {
-    static STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED" }
+    static STATE = { "CREATED": "CREATED", "RUNNING": "RUNNING", "STOPPED": "STOPPED", "CLOSED":"CLOSED" }
     static MAX_PLAYER = 2
     static PLAYERS_ICON = {
         1: 'X',
         2: 'O'
     }
+
+    static BOARD_ROW = 3
+    static BOARD_COL = 3
 
     constructor(id, player) {
         this.id = id
@@ -33,11 +36,11 @@ module.exports = class {
         this.state = this.constructor.STATE.CREATED
 
         this.playerTurn = Math.floor(Math.random() * this.constructor.MAX_PLAYER) + 1
-        this.board = initABoard(3, 3, -1)
+        this.board = initABoard(this.constructor.BOARD_ROW, this.constructor.BOARD_COL, -1)
     }
 
     getPlayerIcon(playerId) {
-        return this.constructor.PLAYERS_ICON[this.players.findIndex(player => player.id === playerId)+1]
+        return this.constructor.PLAYERS_ICON[this.players.findIndex(player => player.id === playerId) + 1]
     }
 
     isCellEmpty(row, col) {
@@ -46,6 +49,81 @@ module.exports = class {
 
     canPlay(playerId) {
         return this.players[this.playerTurn - 1].id === playerId
+    }
+
+    hasWin(playerId) {
+        let numPlayer = this.players.findIndex(player => player.id === playerId) + 1
+
+        const checkCol = () => {
+            let winIndex = 0
+
+            for (let i = 0; i < this.constructor.BOARD_COL; i++) {
+                winIndex = 0
+                for (let j = 0; j < this.constructor.BOARD_ROW; j++) {
+                    if (this.board[i][j] === numPlayer) {
+                        winIndex++
+                    }
+                }
+
+                if (winIndex === 3) {
+                    return true
+                }
+            }
+
+            return false
+        }
+
+        const checkRow = () => {
+
+            let winIndex = 0
+
+            for (let i = 0; i < this.constructor.BOARD_ROW; i++) {
+                winIndex = 0
+                for (let j = 0; j < this.constructor.BOARD_COL; j++) {
+                    if (this.board[i][j] === numPlayer) {
+                        winIndex++
+                    }
+                }
+                
+                if (winIndex === 3) {
+                    return true
+                }
+            }
+
+            return false
+
+        }
+
+        const checkDiag = () => {
+            let winIndex = 0
+
+            for (let i = 0, j = 0; i < this.constructor.BOARD_ROW && j < this.constructor.BOARD_COL; i++ , j++) {
+                if (this.board[i][j] === numPlayer) {
+                    winIndex++
+                }
+            }
+
+            if (winIndex === 3) {
+                return true
+            }
+
+            winIndex = 0
+
+            for (let i = 0, j = this.constructor.BOARD_COL - 1; i < this.constructor.BOARD_ROW && j >= 0; i++ , j--) {
+                if (this.board[i][j] === numPlayer) {
+                    winIndex++
+                }
+            }
+
+            if (winIndex === 3) {
+                return true
+            }
+
+            return false
+        }
+
+        return checkCol() | checkRow() | checkDiag()
+
     }
 
     addNewPlayer(player) {

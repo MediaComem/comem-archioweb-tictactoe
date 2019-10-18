@@ -34,10 +34,17 @@ module.exports = class extends Controller {
         if (game.play(row, col, playerId)) {
             let icon = game.getPlayerIcon(playerId)
 
+            let hasWin = game.hasWin(playerId)
+            if(hasWin){                
+                game.state = Game.STATE.STOPPED
+            }
+
             game.players.forEach((player) => {
                 let playerWS = this.gameManager.findPlayerById(player.id).websocket
-
                 this.sendResourceMessage('updateBoard', [row, col, icon ], playerWS)
+                if(hasWin) {
+                    this.sendResourceMessage('winMove', [playerId, icon], playerWS)
+                }
             })
 
         } else {
