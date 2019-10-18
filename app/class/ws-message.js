@@ -10,52 +10,29 @@
         ]
     }
 
-    Response data structure : 
-    {
-        'code':200 -> ok | 404 -> not found | 500 -> server error,
-        'codeMsg':'See above code',
-        'resource':'',
-        'command':'',
-        'response':{
-            ...
-        }
-    }
 
 */
 
 module.exports = class {
-    static PROTOCOL_CODE = {
-        200: 'OK',
-        201: 'Created',
-        202: 'Accepted',
-        400: 'Bad Request',
-        401: 'Unauthorized',
-        403: 'Forbidden',
-        404: 'Not Found',
-        405: 'Method Not Allowed',
-        418: 'I\'m a Teapot',
-        500: 'Internal Server Error'
+
+    constructor(websocketInstance) {
+        this.websocketInstance = websocketInstance
     }
 
-    static sendResponse(response, resource, command, code) {
-        return JSON.stringify({
-            'code': code,
-            'codeMsg': this.PROTOCOL_CODE[code],
-            'resource': resource,
-            'command': command,
-            'response': response
-        })
+    sendMessage(resource, command, params) {
+        this.websocketInstance.send(
+            this.constructor.createMessageStructure(resource, command, params)
+        )
     }
 
-    static sendResOK(response, resource, command) {
-        return this.sendResponse(response, resource, command, this.PROTOCOL_CODE[200])
+    static sendMessage(resource, command, params, websocketInstance) {
+        websocketInstance.send(
+            this.createMessageStructure(resource, command, params)
+
+        )
     }
 
-    static sendError(errorMsg, code) {
-        return this.sendResponse(errorMsg, undefined, code)
-    }
-
-    static sendMessage(resource, command, params) {
+    static createMessageStructure(resource, command, params) {
         return JSON.stringify({
             'resource': resource,
             'command': command,

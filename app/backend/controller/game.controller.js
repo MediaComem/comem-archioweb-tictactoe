@@ -1,6 +1,5 @@
 const Game = require('../../class/game.class')
-const Controller = require('../../class/controller.class')
-
+const Controller = require('../../class/ws-controller.class')
 
 module.exports = class extends Controller {
     constructor() {
@@ -12,34 +11,34 @@ module.exports = class extends Controller {
         let newGame = new Game(this.games.length + 1, player)
         this.games.push(newGame)
 
-        ws.send(this.sendOK(newGame, 'newGame'))
+        this.sendResourceMessage('displayNewGame', newGame, ws)
     }
 
     getJoinableGame(ws) {
-        ws.send( this.sendOK(this.games.filter((game) => game.state == Game.STATE.CREATED), 'joinableGames'))
+        this.sendResourceMessage('displayJoinableGame', this.games.filter((game) => game.state == Game.STATE.CREATED), ws)
     }
 
     joinGame(ws, player, gameId) {
         let gameToJoin = this.games.find((game) => game.id === gameId)
         gameToJoin.players.push(player)
-        ws.send(this.sendOK(gameToJoin, 'joinningGame'))
+        this.sendResourceMessage(gameToJoin, 'joinningGame', ws)
     }
 
-    updateBoardRequest(ws, gameId ,row, col) {
-        let game = this.games.find(game => game.id==gameid)
+    updateBoardRequest(ws, gameId, playerId ,row, col) {
+        let game = this.games.find(game => game.id == gameId)
 
-        if(!game){
-            ws.send(this.WS_MESSAGE.sendError('No game found for id : '+gameId, this.WS_MESSAGE.PROTOCOL_CODE[400]))
+        if (!game) {
+            console.error('No game found for id : ' + gameId)
             return
         }
 
-        console.log("Game found",game)
+        console.log("Game found", game)
 
-        if(game.isCellEmpty(row,col)){
-            
-            ws.send(this.sendOK({row, col},'updateBoard'))
-        }else{
-            ws.send(this.sendOK('','invalidMove'))
+        if (game.play(row, col, playerId)) {
+            let icon = game.getPlayerIcon(playerId)
+            this.sendResourceMessage('updateBoard', { row, col, icon }, ws)
+        } else {
+            this.sendResourceMessage('invalidMove', ws)
         }
     }
 }

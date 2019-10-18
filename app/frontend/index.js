@@ -5,6 +5,7 @@ global.$ = require("jquery")
 const GameController = require('./controller/game.controller')
 const PlayerController = require('./controller/player.controller')
 const WSFrontendDispatcher = require('./ws-frontend-dispatcher')
+const WSMessage = require('../class/ws-message')
 
 // ---------------- INIT
 let btnCreateNewGame = $('#createNewGame')
@@ -37,8 +38,12 @@ ws.onopen = (e) => {
     // ---------------- EVENT LINKED TO WEBSOCKET MANAGER
     $('#createNewGame').on('click', (evt) => {
         showgameContainer.toggle()
-        creategameContainer.toggle()
-        gameController.createGame(ws)
+
+        wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+            'game',
+            'createGame',
+            []
+        ), ws)
     })
 
     ws.onmessage = (msg) => {

@@ -1,4 +1,4 @@
-const Controller = require('../../class/controller.class')
+const Controller = require('../../class/ws-controller.class')
 const LCS_MANAGER = require('../localstorage-manager')
 
 
@@ -17,36 +17,41 @@ module.exports = class extends Controller {
             return
         }
 
-        ws.send(this.sendMessage('createNewGame', player))
+        this.sendResourceMessage('createNewGame', player, ws)
     }
 
-    newGame(ws, res) {
+    displayNewGame(ws, res) {
         LCS_MANAGER.save('game', res)
 
         res.board.forEach((row, i) => {
             row.forEach((col, j) => {
                 let boardBtn = this.TMP_BOARD_BTN.clone()
-                this.BOARD_GRID.append(boardBtn)
+
                 boardBtn.on('click', (evt) => {
-                    this.updateBoard(ws, { row: i, col: j })
+                    this.updateBoardRequest(ws, i, j)
                 })
+
+                this.BOARD_GRID.append(boardBtn)
             })
         })
+
+        this.boardContainer.show()
     }
 
-    updateBoardRequest(ws, col, row) {
+    updateBoardRequest(ws, row, col) {
         let game = LCS_MANAGER.load('game')
+        let player = LCS_MANAGER.load('player')
 
         if (!game) {
             console.error('player not in any game')
             return
         }
 
-        ws.send(this.sendMessage('updateBoardRequest', [game.id, col, row]))
+        this.sendResourceMessage('updateBoardRequest', [player.id, game.id, row, col], ws)
     }
 
     updateBoard(ws, res) {
-        this.BOARD_GRID.eq(res.col * res.row).text("X")
+        this.BOARD_GRID.children().eq(res.row * 3 + res.col).text(res.icon)
     }
 
     invalidMove(ws, res) {

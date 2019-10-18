@@ -20,42 +20,32 @@ module.exports = class {
     }
 
     dispatchFromMsg(msg, ws) {
-        
+
         try {
             msg = JSON.parse(msg)
         } catch (err) {
-            console.err(err)
+            console.error(err)
             return
         }
 
 
-        console.log("--- MESSAGE RECEIVED ----\n", msg)
+        console.log("--- MESSAGE RECEIVED ----\n")
 
         if (this.checkMsgValidity(msg)) {
-            
-
-            ws.send(WSMessage.sendError("", WSMessage.PROTOCOL_CODE[400]))
+            console.error("------ INVALID MESSAGE -------\n", msg)
             return
         }
 
 
-        // Received message is a response
-        if (msg.code !== undefined) {
-            console.log("------ EXECUTED FUNCTION -------\n",
-                this.route[msg.resource][msg.command], msg.response)
+        console.log("------ EXECUTED FUNCTION -------\n",
+            this.route[msg.resource][msg.command], msg.params)
 
-            this.route[msg.resource][msg.command](ws, msg.response)
-
-        } else { // receive message is not a response
-            console.log("------ EXECUTED FUNCTION -------\n",
-                this.route[msg.resource][msg.command], msg.params)
-
-            if (!Array.isArray(msg.params)) {
-                msg.params = [msg.params]
-            }
-
-            this.route[msg.resource][msg.command](ws,...msg.params)
+        if (!Array.isArray(msg.params)) {
+            msg.params = [msg.params]
         }
+
+        this.route[msg.resource][msg.command](ws, ...msg.params)
+
 
     }
 }
