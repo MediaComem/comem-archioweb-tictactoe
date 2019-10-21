@@ -57,4 +57,8 @@ module.exports = class extends Controller {
     winMove(ws, playerId, icon) {
         alert(`${icon} win.`)
     }
+
+    drawMove(ws) {
+        alert('Draw !')
+    }
 }

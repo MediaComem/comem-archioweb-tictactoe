@@ -107,6 +107,18 @@ module.exports = class {
             this.checkAntiDiagWin(row, col, playerId)
     }
 
+    checkDraw() {
+        for (let i = 0; i < this.boardSize; i++) {
+            for (let j = 0; j < this.boardSize; j++) {
+                if (this.board[i][j] === this.constructor.EMPTY_CELL) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
     addNewPlayer(player) {
         if (this.players.length >= this.MAX_PLAYER) {
             return false

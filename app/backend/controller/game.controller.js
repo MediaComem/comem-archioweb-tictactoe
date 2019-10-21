@@ -35,15 +35,19 @@ module.exports = class extends Controller {
             let icon = game.getPlayerIcon(playerId)
 
             let hasWin = game.hasWin(row, col, playerId)
-            if(hasWin){                
+            let draw = game.checkDraw()
+
+            if (hasWin || draw) {
                 game.state = Game.STATE.STOPPED
             }
 
             game.players.forEach((player) => {
                 let playerWS = this.gameManager.findPlayerById(player.id).websocket
-                this.sendResourceMessage('updateBoard', [row, col, icon ], playerWS)
-                if(hasWin) {
+                this.sendResourceMessage('updateBoard', [row, col, icon], playerWS)
+                if (hasWin) {
                     this.sendResourceMessage('winMove', [playerId, icon], playerWS)
+                } else if (draw) {
+                    this.sendResourceMessage('drawMove', [], playerWS)
                 }
             })
 
