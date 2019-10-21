@@ -136,7 +136,7 @@ module.exports = class {
         this.BOARD_GRID.attr('class','board')
         this.BOARD_GRID.children().each((i,ele) => $(ele).remove())
 
-        $('.info-player-icon' ,this.infoPlayer).attr( 'class', '' )
+        $('.info-player-icon' ,this.infoPlayer).attr( 'class', 'info-player-icon' )
         $('.info-player-icon' ,this.infoPlayer).text('')
         
     }
