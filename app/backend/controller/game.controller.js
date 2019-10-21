@@ -34,7 +34,7 @@ module.exports = class extends Controller {
         if (game.play(row, col, playerId)) {
             let icon = game.getPlayerIcon(playerId)
 
-            let hasWin = game.hasWin(playerId)
+            let hasWin = game.hasWin(row, col, playerId)
             if(hasWin){                
                 game.state = Game.STATE.STOPPED
             }
