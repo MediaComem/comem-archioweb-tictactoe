@@ -1,12 +1,15 @@
 {
-  "name": "simple-version",
-  "version": "1.0.0",
+  "name": "tic-tac-toe-websocket",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --ignore app/frontend/ index.js ",
-    "frontend-build": "npx webpack --watch"
+    "start": "node index.js",
+    "back-watch":"nodemon --ignore app/frontend/ index.js",
+    "front-watch": "npx webpack --watch",
+    "front-build": "npx webpack --mode=\"production\"",
+    "docker-build":"docker build -t tic-tac-toe-websocket ."
   },
   "author": "arthur.verdon@heig-vd.ch",
   "license": "MIT",
