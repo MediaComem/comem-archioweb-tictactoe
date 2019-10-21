@@ -1,6 +1,6 @@
 const Controller = require('../../class/ws-controller.class')
 const LCS_MANAGER = require('../localstorage-manager')
-
+const Game = require('../../class/game.class')
 
 module.exports = class extends Controller {
     constructor(viewManger) {
@@ -19,10 +19,16 @@ module.exports = class extends Controller {
     }
 
     displayNewGame(ws, game) {
+        let player = LCS_MANAGER.load('player')
+
         LCS_MANAGER.save('game', game)
 
-        this.viewManger.displayNewGame(game.board)
+        let gameInstance = new Game()
+        Object.assign(gameInstance, game)
 
+        this.viewManger.displayNewGame(gameInstance.board,
+            gameInstance.getPlayerIcon(player.id),
+            gameInstance.getPlayerTurnIcon())
     }
 
     updateBoardRequest(ws, row, col) {
@@ -34,11 +40,11 @@ module.exports = class extends Controller {
             return
         }
 
-        this.sendResourceMessage('updateBoardRequest', [game.id, player.id ,row, col], ws)
+        this.sendResourceMessage('updateBoardRequest', [game.id, player.id, row, col], ws)
     }
 
     updateBoard(ws, row, col, icon) {
-        this.viewManger.updateBoard(row,col,icon)
+        this.viewManger.updateBoard(row, col, icon)
     }
 
     invalidMove(ws, pos) {

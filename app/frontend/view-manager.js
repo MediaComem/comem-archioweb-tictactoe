@@ -22,6 +22,7 @@ module.exports = class {
         this.btnCreateNewGame = $('#createNewGame')
         this.btnCreateNewGame.attr('disabled')
 
+        this.infoPlayer = $(".info-player")
 
         this.creategameContainer.hide()
     }
@@ -41,11 +42,13 @@ module.exports = class {
         })
     }
 
-    displayNewGame(board) {
-
+    displayNewGame(board, playerIcon, playerTurnIcon) {
+        console.log('ICON PLAYER : ',playerIcon)
         board.forEach((row, i) => {
             row.forEach((col, j) => {
                 let boardBtn = this.TMP_BOARD_BTN.clone()
+
+                boardBtn.addClass('EMPTY')
 
                 boardBtn.on('click', (evt) => {
                     this.wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
@@ -59,18 +62,29 @@ module.exports = class {
             })
         })
 
+        $('.info-player-icon' ,this.infoPlayer).addClass(playerIcon)
+        $('.info-player-icon' ,this.infoPlayer).text(playerIcon)
+        
+        this.BOARD_GRID.addClass(`${playerTurnIcon}-turn`)
+
         this.showgameContainer.hide()
         this.creategameContainer.show()
     }
 
     updateBoard(row, col, icon) {
-        this.BOARD_GRID.children().eq(row * 3 + col).text(icon)
+        let boardBtn = this.BOARD_GRID.children().eq(row * 3 + col)
+        boardBtn.text(icon)
+        boardBtn.removeClass('EMPTY')
+        boardBtn.addClass(icon.toUpperCase())
+
+        this.BOARD_GRID.removeClass(`${icon.toUpperCase()}-turn`)
+        this.BOARD_GRID.addClass(`${icon.toUpperCase() === 'O' ? 'X' : 'O'}-turn`)
     }
 
     addNewJoinableGame(game) {
         let joinableGame = this.TMP_JOINABLE_GAME.clone()
-
-        $('.playerId', joinableGame).text(game.players[0].id)
+        
+        $('.playerid', joinableGame).text(`#${game.players[0].id}`)
         $('.playername', joinableGame).text(game.players[0].username)
 
         $('.join-btn', joinableGame).on('click', (e) => {
@@ -82,6 +96,6 @@ module.exports = class {
         })
 
 
-        this.showgameContainer.append(joinableGame)
+        $(".games",this.showgameContainer).append(joinableGame)
     }
 }

@@ -32,6 +32,12 @@ wss.on('connection', (ws) => {
         []
     ), ws)
 
+    wsBackendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+        'game',
+        'getJoinableGame',
+        []
+    ), ws)
+
     console.log("=== NEW WS CONNECTION ===")
     ws.on('message', (msg) => {
         wsBackendDispatcher.dispatchFromMsg(msg, ws)

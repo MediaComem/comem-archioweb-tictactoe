@@ -8,9 +8,9 @@
 const initABoard = (x, y, value) => {
     let board = Array(x)
 
-    for (i = 0; i < x; i++) {
+    for (let i = 0; i < x; i++) {
         board[i] = Array(y)
-        for (j = 0; j < y; j++) {
+        for (let j = 0; j < y; j++) {
             board[i][j] = value
         }
     }
@@ -32,7 +32,7 @@ module.exports = class {
         this.id = id
         this.players = [player]
         this.state = this.constructor.STATE.CREATED
-        this.boardSize = 3
+        this.boardSize = boardSize
 
 
         this.playerTurn = Math.floor(Math.random() * this.constructor.MAX_PLAYER) + 1
@@ -40,7 +40,11 @@ module.exports = class {
     }
 
     getPlayerIcon(playerId) {
-        return this.constructor.PLAYERS_ICON[this.players.findIndex(player => player.id === playerId) + 1]
+        return this.constructor.PLAYERS_ICON[this.getPlayerNum(playerId)]
+    }
+
+    getPlayerTurnIcon() {
+        return this.constructor.PLAYERS_ICON[this.playerTurn]
     }
 
     isCellEmpty(row, col) {

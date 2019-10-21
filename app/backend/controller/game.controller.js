@@ -11,16 +11,19 @@ module.exports = class extends Controller {
         let newGame = new Game(this.gameManager.games.length + 1, player)
         this.gameManager.addGame(newGame)
 
+        // alert all player that a new game has been created
         this.gameManager.players.forEach(p => {
             if (p.id !== player.id) {
                 this.sendResourceMessage('newJoinableGame', newGame, p.websocket)
             }
         })
+
+        // will display the new game for the player
         this.sendResourceMessage('displayNewGame', newGame, ws)
     }
 
     getJoinableGame(ws) {
-        this.sendResourceMessage('displayJoinableGame', this.gameManager.getAllCreatedGames(), ws)
+        this.sendResourceMessage('newJoinableGame', this.gameManager.getAllCreatedGames(), ws)
     }
 
     updateBoardRequest(ws, gameId, playerId, row, col) {

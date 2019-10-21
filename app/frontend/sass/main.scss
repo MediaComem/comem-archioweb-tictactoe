@@ -12,6 +12,7 @@ body {
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
+        padding-bottom:80px;
 
         .joinable-game {
           display: flex;
@@ -22,6 +23,7 @@ body {
           border-radius: 5px;
           padding: 5% 1%;
           width: 90%;
+          margin:15px 0;
 
           .body {
             width: 50%;
@@ -36,11 +38,9 @@ body {
               justify-content: center;
               flex-direction: column;
             }
-
-            //border-right: 2px solid grey;
           }
           .join {
-            //padding-left:1%;
+            
           }
         }
       }
@@ -57,8 +57,9 @@ body {
 
     main {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
       padding-top:10px;
 
       .board {
@@ -68,10 +69,7 @@ body {
         grid-gap: 5px;
 
         width: 70vw;
-        max-width: 550px;
-        
-        height: 70vw;
-        max-height: 550px;
+        min-height: 70vh;
 
         background: lightgrey;
 
@@ -80,8 +78,43 @@ body {
           height: 100%;
           background: white;
           border:none;
-          font-size: 80%;
+          font-size: 5rem;
         }
+
+        .O {
+          color:blue;
+        }
+        .X {
+          color:red;
+        }
+        .EMPTY {
+          color:grey;
+        }
+      }
+
+      .board.O-turn{
+        border:3px solid blue;
+      }
+      .board.X-turn{
+        border:3px solid red;
+      }
+    }
+    .info-player {
+      text-align: center;
+      margin-top: 10px;
+      width: 50%;
+      display:flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      font-size: 2.25rem;
+      p{width: 100%;}
+      
+      .info-player-icon.O{
+        color:blue;
+      }
+      .info-player-icon.X{
+        color:red;
+
       }
     }
   }
