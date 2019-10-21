@@ -8,7 +8,7 @@ const WSFrontendDispatcher = require('./ws-frontend-dispatcher')
 const ViewManager = require('./view-manager')
 
 // ---------------- WEBSOCKET MANAGEMENT
-const WS_URL = 'ws://localhost:8081'
+const WS_URL = `ws://${window.location.hostname}:8081`
 
 let ws = new WebSocket(WS_URL)
 
