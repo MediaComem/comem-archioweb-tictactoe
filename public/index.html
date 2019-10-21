@@ -14,16 +14,17 @@
     <div class="container showgame-container">
         <header>
             <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Filter" aria-describedby="button-addon2">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" id="btn-search">Search</button>
-                </div>
+                <input type="text" 
+                id="searchbyplayer"
+                class="form-control" 
+                placeholder="Search for player" >
+                
             </div>
         </header>
 
         <main>
             <div class="games">
-                <div class="shadow tmp joinable-game ">
+                <div class="shadow tmp joinable-game" data-player="" data-gameid = "">
                     <div class="body">
                         <div class="playerid">#1</div>
                         <div class="playername">
@@ -51,7 +52,7 @@
     <div class="creategame-container">
         <header>
             <nav class="navbar navbar-light bg-light">
-                <button class="btn btn-danger">Exit Game</button>
+                <button class="btn btn-danger" id="exit-game">Exit Game</button>
             </nav>
         </header>
 

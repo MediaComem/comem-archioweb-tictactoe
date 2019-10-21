@@ -40,10 +40,29 @@ module.exports = class {
                 []
             ), this.websocket)
         })
+
+        $('#exit-game').on('click', (evt) => {
+            this.wsFrontendDispatcher.dispatchFromMsg(WSMessage.createMessageStructure(
+                'game',
+                'exitGameRequest',
+                []
+            ), this.websocket)
+        })
+
+        $('#searchbyplayer').on('keyup', (evt) => {
+            let inputText = $('#searchbyplayer').val() ?  $('#searchbyplayer').val() : ''
+            
+            $('.games',this.showgameContainer).children().each((i, ele) => {
+                if($(ele).attr('data-player').includes(inputText) || inputText == ''){
+                    $(ele).fadeIn('slow')
+                }else{
+                    $(ele).fadeOut('slow')
+                }
+            })
+        })
     }
 
     displayNewGame(board, playerIcon, playerTurnIcon) {
-        console.log('ICON PLAYER : ',playerIcon)
         board.forEach((row, i) => {
             row.forEach((col, j) => {
                 let boardBtn = this.TMP_BOARD_BTN.clone()
@@ -84,6 +103,9 @@ module.exports = class {
     addNewJoinableGame(game) {
         let joinableGame = this.TMP_JOINABLE_GAME.clone()
         
+        joinableGame.attr('data-player',`${game.players[0].id} - ${game.players[0].username}`)
+        joinableGame.attr('data-gameid',`${game.id}`)
+
         $('.playerid', joinableGame).text(`#${game.players[0].id}`)
         $('.playername', joinableGame).text(game.players[0].username)
 
@@ -97,5 +119,25 @@ module.exports = class {
 
 
         $(".games",this.showgameContainer).append(joinableGame)
+    }
+
+    removeJoinableGame(gameId) {
+        $(".games",this.showgameContainer).children().each((i, ele) => {
+            if($(ele).attr('data-gameid') == gameId) {
+                $(ele).fadeOut("fast").remove()
+            }
+        })
+    }
+
+    exitGame() {
+        this.showgameContainer.show()
+        this.creategameContainer.hide()
+
+        this.BOARD_GRID.attr('class','board')
+        this.BOARD_GRID.children().each((i,ele) => $(ele).remove())
+
+        $('.info-player-icon' ,this.infoPlayer).attr( 'class', '' )
+        $('.info-player-icon' ,this.infoPlayer).text('')
+        
     }
 }

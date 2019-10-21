@@ -67,9 +67,36 @@ module.exports = class extends Controller {
             game.state = Game.STATE.RUNNING
 
             this.sendResourceMessage('displayNewGame', [game], ws)
+            
+            this.gameManager.players.forEach(player => {
+                this.sendResourceMessage('removeJoinableGame', [game.id], player.websocket)
+            })
         } else {
             this.sendResourceMessage('invalidGame', [], ws)
         }
 
+    }
+
+    exitGame(ws, gameId, playerId) {
+        let game = this.gameManager.findGameById(gameId)
+
+
+        game.players.forEach((player) => {
+            let playerWS = this.gameManager.findPlayerById(player.id).websocket
+
+            if(player.id === playerId){
+                this.sendResourceMessage('exitGame', ['you have left the game'], playerWS)
+            }else{
+                this.sendResourceMessage('exitGame', ['you\'re opponent has left the game'], playerWS)
+            }
+        })
+
+        if(game.state === Game.STATE.CREATED) {
+            this.gameManager.players.forEach(player => {
+                this.sendResourceMessage('removeJoinableGame', [game.id], player.websocket)
+            })
+        }        
+        
+        game.state = Game.STATE.CLOSED
     }
 }

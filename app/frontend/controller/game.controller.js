@@ -55,6 +55,10 @@ module.exports = class extends Controller {
         this.viewManger.addNewJoinableGame(newGame)
     }
 
+    removeJoinableGame(ws, gameId){
+        this.viewManger.removeJoinableGame(gameId)
+    }
+
     requestJoinGame(ws, gameId) {
         let player = LCS_MANAGER.load('player')
         this.sendResourceMessage('requestJoinGame', [gameId, player.id], ws)
@@ -67,4 +71,23 @@ module.exports = class extends Controller {
     drawMove(ws) {
         alert('Draw !')
     }
+
+    exitGameRequest(ws) {
+        let game = LCS_MANAGER.load('game')
+        let player = LCS_MANAGER.load('player')
+
+        if(!game || !player) {
+            return
+        }
+
+        this.sendResourceMessage('exitGame', [game.id, player.id], ws)
+    }
+
+    exitGame(ws, msg) {
+        alert(msg)
+
+        this.viewManger.exitGame()
+    }
+
+    
 }
