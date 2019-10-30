@@ -11,6 +11,6 @@ module.exports = class extends Controller {
     createPlayer(ws) {
         let newPlayer = new Player(this.gameManager.players.length + 1, "No Name", ws)
         this.gameManager.addPlayer(newPlayer)
-        this.sendResourceMessage('receiveMyPlayer', newPlayer.getWithoutWS(), ws)
+        this.sendResourceMessage('receiveMyPlayer', [newPlayer.getWithoutWS()], ws)
     }
 }

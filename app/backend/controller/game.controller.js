@@ -14,16 +14,18 @@ module.exports = class extends Controller {
         // alert all player that a new game has been created
         this.gameManager.players.forEach(p => {
             if (p.id !== player.id) {
-                this.sendResourceMessage('newJoinableGame', newGame, p.websocket)
+                this.sendResourceMessage('newJoinableGame', [newGame], p.websocket)
             }
         })
 
         // will display the new game for the player
-        this.sendResourceMessage('displayNewGame', newGame, ws)
+        this.sendResourceMessage('displayNewGame', [newGame], ws)
     }
 
     getJoinableGame(ws) {
-        this.sendResourceMessage('newJoinableGame', this.gameManager.getAllCreatedGames(), ws)
+        this.gameManager.getAllCreatedGames().forEach((game, i) => {
+            this.sendResourceMessage('newJoinableGame', [game], ws)
+        })        
     }
 
     updateBoardRequest(ws, gameId, playerId, row, col) {
@@ -46,6 +48,7 @@ module.exports = class extends Controller {
 
             game.players.forEach((player) => {
                 let playerWS = this.gameManager.findPlayerById(player.id).websocket
+                
                 this.sendResourceMessage('updateBoard', [row, col, icon], playerWS)
                 if (hasWin) {
                     this.sendResourceMessage('winMove', [playerId, icon], playerWS)

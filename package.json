@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "back-watch":"nodemon --ignore app/frontend/ index.js",
-    "front-watch": "npx webpack --watch",
+    "back-watch": "nodemon --ignore app/frontend/ index.js",
+    "front-watch": "npx webpack --watch --mode=\"development\"",
     "front-build": "npx webpack --mode=\"production\"",
-    "docker-build":"docker build -t tic-tac-toe-websocket ."
+    "docker-build": "docker build -t tic-tac-toe-websocket ."
   },
   "author": "arthur.verdon@heig-vd.ch",
   "license": "MIT",
