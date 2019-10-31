@@ -4,7 +4,11 @@ const Game = require('../class/game.class')
 
 // ----------------------------------- CONSTANT DEFINITION
 const WS_URL = `ws://${window.location.hostname}:${Number.parseInt(window.location.port) + 1}`
-console.log(WS_URL)
+
+const displayToast = (msg) => {
+    $('#alertMsg .toast-header-text').text(msg)
+    $('#alertMsg').toast('show')
+}
 
 // ----------------------------------- WEBSOCKET INIT
 let ws = new WebSocket(WS_URL)
@@ -167,15 +171,15 @@ $(() => {
                 break;
 
             case 'winMove':
-                alert(`${params[1]} win.`)
+                displayToast(`${params[1]} win.`)
                 break;
 
             case 'drawMove':
-                alert('Draw !')
+                displayToast('Draw !')
                 break;
 
             case 'invalidMove':
-                alert('Move invalid')
+                displayToast('Move invalid')
                 break;
 
             case 'removeJoinableGame':
@@ -186,7 +190,7 @@ $(() => {
                 break;
 
             case 'exitGame':
-                alert(params[0])
+                displayToast(params[0])
                 exitGame(ws)
                 break;
         }

@@ -1,6 +1,25 @@
 @import "~bootstrap/scss/bootstrap";
 
 body {
+  div#toast-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 10;
+
+    .toast {
+      border: 3px solid lightgray;
+      border-radius: 5px;
+
+      .toast-header{
+        background: lightgray;
+        color:black;
+        font-size: 1.3em;
+      }
+    }
+  }
+
   div.showgame-container {
     header {
       margin-top: 5%;
