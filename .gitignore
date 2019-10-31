@@ -1,1 +1,3 @@
-node_modules
+/inventory*
+!/inventory.sample.yml
+/node_modules

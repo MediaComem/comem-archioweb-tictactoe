@@ -1,0 +1,12 @@
+---
+version: "3.7"
+services:
+  router:
+    image: crossbario/crossbar
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - "/etc/wamp/config.json:/node/.crossbar/config.json:ro"
+      - "/etc/wamp/ssl:/node/ssl:ro"
+      - "/var/www/wamp:/node/web:ro"
