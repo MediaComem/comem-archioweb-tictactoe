@@ -17,7 +17,7 @@ $(() => {
     const CREATEGAME_CONTAINER = $('.creategame-container')
     const INFOPLAYER_CONTAINER = $(".info-player")
     const BOARD_GRID = $('.board')
-    const GAME_CONTAINER = $('.game')
+    const GAMES_CONTAINER = $('.games')
 
     const TMP_BOARD_BTN = $('.tmp.board-btn', CREATEGAME_CONTAINER).remove().removeClass('tmp').clone()
     const TMP_JOINABLE_GAME = $('.tmp.joinable-game').removeClass('tmp').remove().clone()
@@ -141,7 +141,7 @@ $(() => {
 
     const exitGame = () => {
         SHOWGAME_CONTAINER.show()
-        GAME_CONTAINER.hide()
+        CREATEGAME_CONTAINER.hide()
 
         BOARD_GRID.attr('class', 'board')
         BOARD_GRID.children().each((i, ele) => $(ele).remove())
@@ -220,7 +220,10 @@ $(() => {
         })
 
         INPT_SEARCH_GAME.keyup(() => {
-            GAME_CONTAINER.children().each((i, ele) => {
+            let inputText = INPT_SEARCH_GAME.val()
+
+            GAMES_CONTAINER.children().each((i, ele) => {
+                console.log(ele.innerHTML)
                 if ($(ele).attr('data-player').includes(inputText) || inputText == '') {
                     $(ele).fadeIn('slow')
                 } else {
