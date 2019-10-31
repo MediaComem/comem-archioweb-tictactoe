@@ -1,3 +1,4 @@
+const uuidv4 = require('uuid/v4');
 const Player = require('../../class/player.class')
 
 
@@ -7,7 +8,7 @@ module.exports = class {
     }
 
     createPlayer() {
-        let newPlayer = new Player(this.gameManager.players.length + 1, "No Name")
+        let newPlayer = new Player(uuidv4(), "No Name")
         this.gameManager.addPlayer(newPlayer)
 
         return newPlayer
