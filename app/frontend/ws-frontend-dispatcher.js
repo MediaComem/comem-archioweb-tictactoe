@@ -240,8 +240,8 @@ $(() => {
             /*
                 Message data structure :
                 {
-                    'resource':'[RESOURCE_NAME]'
-                    'command':'[COMMAND_NAME'],
+                    'resource':'[RESOURCE_NAME]'.
+                    'command':'[COMMAND_NAME]',
                     'params': [
                         {'param1':'zzz'},
                         ...
