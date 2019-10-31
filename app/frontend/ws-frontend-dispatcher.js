@@ -1,5 +1,4 @@
 const LCS_MANAGER = require('./localstorage-manager')
-const Game = require('../class/game.class')
 const ViewManager = require('./view-manager')
 
 // ----------------------------------- CONSTANT DEFINITION
@@ -45,14 +44,8 @@ const exitGameRequest = (ws) => {
 const displayNewGame = (ws, game) => {
     let player = LCS_MANAGER.load('player')
     LCS_MANAGER.save('game', game)
-
-    let gameInstance = new Game()
-    Object.assign(gameInstance, game)
-
-    viewManager.displayNewGame(gameInstance.board,
-        gameInstance.getPlayerIcon(player.id),
-        gameInstance.getPlayerTurnIcon(),
-        (col, row) => {
+    
+    viewManager.displayNewGame(player, game, (col, row) => {
             ws.send(JSON.stringify({
                 resource: 'game',
                 command: 'updateBoardRequest',
@@ -142,7 +135,8 @@ const receiveMyPlayer = (playerFromServer) => {
 const dispatchPlayerCommand = (command, params, ws) => {
     switch (command) {
         case 'receiveMyPlayer':
-            receiveMyPlayer(params[0])
+            let playerFromServer = params[0]
+            receiveMyPlayer(playerFromServer)
             break;
     }
 }

@@ -1,3 +1,5 @@
+const Game = require('../class/game.class')
+
 module.exports = class {
     constructor() {
         this.SHOWGAME_CONTAINER = $('.showgame-container')
@@ -25,8 +27,14 @@ module.exports = class {
         this.TOAST.toast('show')
     }
 
-    displayNewGame(boardOfGameInstance,playerIcon, playerTurnIcon, fncUpdateBoardRequest) {
-        boardOfGameInstance.forEach((row, i) => {
+    displayNewGame(player, game, fncUpdateBoardRequest) {
+        let gameInstance = new Game()
+        Object.assign(gameInstance, game)
+        
+        let playerIcon = gameInstance.getPlayerIcon(player.id)
+        let playerTurnIcon =gameInstance.getPlayerTurnIcon()
+        
+        gameInstance.board.forEach((row, i) => {
             row.forEach((col, j) => {
                 let boardBtn = this.TMP_BOARD_BTN.clone()
 
