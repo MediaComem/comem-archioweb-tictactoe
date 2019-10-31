@@ -1,14 +1,9 @@
 const LCS_MANAGER = require('./localstorage-manager')
 const Game = require('../class/game.class')
-
+const ViewManager = require('./view-manager')
 
 // ----------------------------------- CONSTANT DEFINITION
 const WS_URL = `ws://${window.location.hostname}:${Number.parseInt(window.location.port) + 1}`
-
-const displayToast = (msg) => {
-    $('#alertMsg .toast-header-text').text(msg)
-    $('#alertMsg').toast('show')
-}
 
 // ----------------------------------- WEBSOCKET INIT
 let ws = new WebSocket(WS_URL)
@@ -16,24 +11,7 @@ let ws = new WebSocket(WS_URL)
 // ----------------------------------- DOM MANAGEMENT
 // When dom ready
 $(() => {
-    // ----------------------------------- CONST DOM ELEMENT DEFINITION
-    const SHOWGAME_CONTAINER = $('.showgame-container')
-    const CREATEGAME_CONTAINER = $('.creategame-container')
-    const INFOPLAYER_CONTAINER = $(".info-player")
-    const BOARD_GRID = $('.board')
-    const GAMES_CONTAINER = $('.games')
-
-    const TMP_BOARD_BTN = $('.tmp.board-btn', CREATEGAME_CONTAINER).remove().removeClass('tmp').clone()
-    const TMP_JOINABLE_GAME = $('.tmp.joinable-game').removeClass('tmp').remove().clone()
-
-    const BTN_CREATE_NEWGAME = $('#createNewGame')
-    const BTN_EXIT_GAME = $('#exit-game')
-
-    const INPT_SEARCH_GAME = $('#searchbyplayer')
-
-    // ----------------------------------- APP INIT
-    CREATEGAME_CONTAINER.hide()
-    BTN_CREATE_NEWGAME.attr('disabled')
+    let viewManager = new ViewManager()
 
     // ----------------------------------- GAME MANAGEMENT    
 
@@ -73,124 +51,86 @@ $(() => {
 
         let gameInstance = new Game()
         Object.assign(gameInstance, game)
-        let boardOfGameInstance = gameInstance.board
-        let playerIcon = gameInstance.getPlayerIcon(player.id)
-        let playerTurnIcon = gameInstance.getPlayerTurnIcon()
 
-        boardOfGameInstance.forEach((row, i) => {
-            row.forEach((col, j) => {
-                let boardBtn = TMP_BOARD_BTN.clone()
-
-                boardBtn.addClass('EMPTY')
-
-                boardBtn.on('click', (evt) => {
-                    ws.send(JSON.stringify({
-                        resource: 'game',
-                        command: 'updateBoardRequest',
-                        params: [game.id, player.id, i, j]
-                    }))
-                })
-
-                BOARD_GRID.append(boardBtn)
+        viewManager.displayNewGame(gameInstance.board,
+            gameInstance.getPlayerIcon(player.id),
+            gameInstance.getPlayerTurnIcon(),
+            (col, row) => {
+                ws.send(JSON.stringify({
+                    resource: 'game',
+                    command: 'updateBoardRequest',
+                    params: [game.id, player.id, col, row]
+                }))
             })
-        })
-
-        $('.info-player-icon', INFOPLAYER_CONTAINER).addClass(playerIcon)
-        $('.info-player-icon', INFOPLAYER_CONTAINER).text(playerIcon)
-
-        BOARD_GRID.addClass(`${playerTurnIcon}-turn`)
-
-        SHOWGAME_CONTAINER.hide()
-        CREATEGAME_CONTAINER.show()
     }
 
     const updateBoard = (row, col, icon) => {
-        let boardBtn = BOARD_GRID.children().eq(row * 3 + col)
-        boardBtn.text(icon)
-        boardBtn.removeClass('EMPTY')
-        boardBtn.addClass(icon.toUpperCase())
-
-        BOARD_GRID.removeClass(`${icon.toUpperCase()}-turn`)
-        BOARD_GRID.addClass(`${icon.toUpperCase() === 'O' ? 'X' : 'O'}-turn`)
+        viewManager.updateBoard(row, col, icon)
     }
 
     const addNewJoinableGame = (ws, game) => {
-        let joinableGame = TMP_JOINABLE_GAME.clone()
         let player = LCS_MANAGER.load('player')
 
-        joinableGame.attr('data-player', `${game.players[0].id} - ${game.players[0].username}`)
-        joinableGame.attr('data-gameid', `${game.id}`)
-
-        $('.playerid', joinableGame).text(`${game.players[0].id}`)
-        $('.playername', joinableGame).text(game.players[0].username)
-
-        $('.join-btn', joinableGame).on('click', (e) => {
+        viewManager.addNewJoinableGame(player, game, (gameId, playerId) => {
             ws.send(JSON.stringify({
                 resource: 'game',
                 command: 'requestJoinGame',
-                params: [game.id, player.id]
+                params: [gameId, playerId]
             }))
         })
-
-        $(".games", SHOWGAME_CONTAINER).append(joinableGame)
     }
 
     const removeJoinableGame = (gameId) => {
-        $(".games", SHOWGAME_CONTAINER).children().each((i, ele) => {
-            if ($(ele).attr('data-gameid') == gameId) {
-                $(ele).fadeOut("fast").remove()
-            }
-        })
+        viewManager.removeJoinableGame(gameId)
     }
 
     const exitGame = () => {
-        SHOWGAME_CONTAINER.show()
-        CREATEGAME_CONTAINER.hide()
-
-        BOARD_GRID.attr('class', 'board')
-        BOARD_GRID.children().each((i, ele) => $(ele).remove())
-
-        $('.info-player-icon', INFOPLAYER_CONTAINER).attr('class', 'info-player-icon')
-        $('.info-player-icon', INFOPLAYER_CONTAINER).text('')
-
+        viewManager.exitGame()
     }
 
     const dispatchGameCommand = (command, params, ws) => {
         switch (command) {
             case 'newJoinableGame':
-                addNewJoinableGame(ws, params[0])
+                let newJoinableGame = params[0]
+                addNewJoinableGame(ws, newJoinableGame)
                 break;
 
             case 'displayNewGame':
-                displayNewGame(ws, params[0])
+                let newGame = params[0]
+                displayNewGame(ws, newGame)
                 break;
 
             case 'updateBoard':
-                console.log(params)
-                updateBoard(params[0], params[1], params[2])
+                let row = params[0]
+                let col = params[1]
+                let icon = params[2]
+                updateBoard(row, col, icon)
                 break;
 
             case 'winMove':
-                displayToast(`${params[1]} win.`)
+                let winIcon = params[1]
+                viewManager.displayToast(`${winIcon} win.`)
                 break;
 
             case 'drawMove':
-                displayToast('Draw !')
+                viewManager.displayToast('Draw !')
                 break;
 
             case 'invalidMove':
-                displayToast('Move invalid')
+                viewManager.displayToast('Move invalid')
                 break;
 
             case 'removeJoinableGame':
-                removeJoinableGame(params[0])
+                let gameToRemove = params[0]
+                removeJoinableGame(gameToRemove)
                 break;
 
             case 'invalidGame':
                 break;
 
             case 'exitGame':
-                displayToast(params[0])
+                let exitMsg = params[0]
+                viewManager.displayToast(exitMsg)
                 exitGame(ws)
                 break;
         }
@@ -215,27 +155,10 @@ $(() => {
         console.log("=== CONNECTION OPEN WITH WEBSOCKET ===")
 
         // ----------------------------------- DOM EVENT MANAGEMENT
-        BTN_CREATE_NEWGAME.click(() => {
-            createNewGame(ws)
-        })
-
-        BTN_EXIT_GAME.click(() => {
-            exitGameRequest(ws)
-        })
-
-        INPT_SEARCH_GAME.keyup(() => {
-            let inputText = INPT_SEARCH_GAME.val()
-
-            GAMES_CONTAINER.children().each((i, ele) => {
-                console.log(ele.innerHTML)
-                if ($(ele).attr('data-player').includes(inputText) || inputText == '') {
-                    $(ele).fadeIn('slow')
-                } else {
-                    $(ele).fadeOut('slow')
-                }
-            })
-        })
-
+        viewManager.initEventManager(
+            () => createNewGame(ws),
+            () => exitGameRequest(ws)
+        )
 
         ws.onmessage = (msg) => {
             console.log('=== NEW MESSAGE ===')

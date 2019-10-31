@@ -17,12 +17,9 @@ let playersWS = {}
  * necessary for all websocket command linked to the game resource
  * @param {*} command 
  * @param {*} params 
- * @param {*} gameController 
- * @param {*} gameManager 
  * @param {*} actualPlayer 
- * @param {*} playersWS 
  */
-const gameDispatcher = (command, params, gameController, gameManager, actualPlayer, playersWS) => {
+const gameDispatcher = (command, params, actualPlayer) => {
     switch (command) {
         case 'createNewGame':
             let newGame = gameController.createNewGame(params[0])
@@ -142,22 +139,6 @@ const gameDispatcher = (command, params, gameController, gameManager, actualPlay
     }
 }
 
-/**
- * Will execute the function asked by websocket and send the message to other websocket if
- * necessary for all websocket command linked to the player resource
- * @param {*} command 
- * @param {*} params 
- * @param {*} playerController 
- * @param {*} gameManager 
- * @param {*} actualPlayer 
- * @param {*} playersWS 
- */
-const playerDispatcher = (command, params, playerController, gameManager, actualPlayer, playersWS) => {
-    switch (command) {
-
-    }
-}
-
 // --- init websocket
 let wss = new WebSocket.Server({
     port: WS_PORT,
@@ -179,7 +160,6 @@ console.log(`=== LISTENING ON ${WS_PORT} ===`)
     }
 */
 wss.on('connection', (ws) => {
-
 
     // --- New player management
 
@@ -210,13 +190,7 @@ wss.on('connection', (ws) => {
 
         switch (msgData.resource) {
             case 'game':
-                gameDispatcher(msgData.command, msgData.params, gameController,
-                    gameManager, newPlayer, playersWS)
-                break;
-
-            case 'player':
-                playerDispatcher(msgData.command, msgData.params, playerController,
-                    gameManager, newPlayer, playersWS)
+                gameDispatcher(msgData.command, msgData.params, newPlayer)
                 break;
         }
     })

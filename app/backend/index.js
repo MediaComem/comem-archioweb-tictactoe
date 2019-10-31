@@ -12,4 +12,4 @@ app.use('/', express.static('public'))
 
 app.listen(PORT, () => { console.log(`=== LISTENING ON ${PORT} ===`) })
 
-require('./app/backend/ws-backend-dispatcher')
+require('./ws-backend-dispatcher')
