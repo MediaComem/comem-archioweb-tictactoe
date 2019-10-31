@@ -121,7 +121,7 @@ $(() => {
         joinableGame.attr('data-player', `${game.players[0].id} - ${game.players[0].username}`)
         joinableGame.attr('data-gameid', `${game.id}`)
 
-        $('.playerid', joinableGame).text(`#${game.players[0].id}`)
+        $('.playerid', joinableGame).text(`${game.players[0].id}`)
         $('.playername', joinableGame).text(game.players[0].username)
 
         $('.join-btn', joinableGame).on('click', (e) => {
