@@ -1,22 +1,25 @@
-FROM node:alpine
+FROM node:12.13.0-alpine
 
-LABEL name="tic-tac-toe-websocket"
-LABEL version="0.1"
-LABEL description="A container for a Tic-Tac-Toe in websocket"
+LABEL name="tic-tac-toe-websocket" \
+      version="0.1" \
+      description="A container for a Tic-Tac-Toe in websocket"
 
 WORKDIR /usr/src/app
 
-ARG NODE_ENV
-ENV NODE_ENV $NODE_ENV
+ENV NODE_ENV=production \
+    SERVER_PORT=8080 \
+    WEBSOCKET_PORT=8081
 
-COPY . /usr/src/app
+COPY package.json package-lock.json /usr/src/app/
 
-RUN npm install
+RUN apk --no-cache add \
+      make \
+      python \
+    && \
+    npm install
 
+COPY . /usr/src/app/
 
-ENV SERVER_PORT 8080
-ENV WEBSOCKET_PORT 8081
-EXPOSE $SERVER_PORT
-EXPOSE $WEBSOCKET_PORT
+EXPOSE $SERVER_PORT $WEBSOCKET_PORT
 
 CMD [ "npm", "start" ]
