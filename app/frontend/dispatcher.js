@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-const LCS_MANAGER = require('./localstorage-manager');
 const ViewManager = require('./view-manager');
 
 const viewManager = new ViewManager();
