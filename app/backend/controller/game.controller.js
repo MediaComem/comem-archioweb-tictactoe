@@ -18,37 +18,33 @@ module.exports = class {
     return this.gameManager.getAllCreatedGames();
   }
 
-  updateBoardRequest(gameId, playerId, row, col) {
+  play(gameId, playerId, col, row) {
     const game = this.gameManager.findGameById(gameId);
 
     if (!game) {
-      console.error(`No game found for id : ${gameId}`);
-      return 'noGameFound';
-    }
-
-    if (game.play(row, col, playerId)) {
-      const icon = game.getPlayerIcon(playerId);
-
-      const hasWin = game.hasWin(row, col, playerId);
-      const draw = game.checkDraw();
-
-      if (hasWin || draw) {
-        game.state = Game.STATE.STOPPED;
-      }
-
-      return {
-        players: game.players,
-        playerIcon: icon,
-        hasWin: hasWin,
-        draw: draw
-      };
-
-    } else {
+      return 'invalidGame';
+    } else if (!game.play(col, row, playerId)) {
       return 'invalidMove';
     }
+
+    const icon = game.getPlayerIcon(playerId);
+
+    const hasWin = game.hasWin(row, col, playerId);
+    const draw = game.checkDraw();
+
+    if (hasWin || draw) {
+      game.state = Game.STATE.STOPPED;
+    }
+
+    return {
+      players: game.players,
+      playerIcon: icon,
+      hasWin: hasWin,
+      draw: draw
+    };
   }
 
-  requestJoinGame(gameId, playerId) {
+  joinGame(gameId, playerId) {
     const game = this.gameManager.findGameById(gameId);
     const player = this.gameManager.findPlayerById(playerId);
 
@@ -67,6 +63,6 @@ module.exports = class {
 
     game.state = Game.STATE.CLOSED;
 
-    return { game: game, players: this.gameManager.players, idPlayerSendingRequest: playerId };
+    return { game: game, idPlayerSendingRequest: playerId };
   }
 };

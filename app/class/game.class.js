@@ -52,7 +52,7 @@ module.exports = class {
       return this.constructor.PLAYERS_ICON[this.playerTurn];
     }
 
-    isCellEmpty(row, col) {
+    isCellEmpty(col, row) {
       return this.board[row][col] === this.constructor.EMPTY_CELL;
     }
 
@@ -141,12 +141,12 @@ module.exports = class {
       return true;
     }
 
-    play(row, col, playerId) {
+    play(col, row, playerId) {
       if (this.state !== this.constructor.STATE.RUNNING) {
         return false;
       }
 
-      if (!this.isCellEmpty(row, col) || !this.canPlay(playerId)) {
+      if (!this.isCellEmpty(col, row) || !this.canPlay(playerId)) {
         return false;
       }
 
