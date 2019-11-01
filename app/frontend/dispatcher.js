@@ -8,74 +8,69 @@ let currentPlayer;
 
 const viewManager = new ViewManager();
 
+function onError(err) {
+  if (err.args && err.args.length) {
+    viewManager.displayToast(err.args[0]);
+  } else {
+    viewManager.displayToast('An unexpected error occurred');
+  }
+}
+
 // GAME MANAGEMENT
 // ===============
 
-function addNewJoinableGame(session, game) {
-  viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
-    session.call('ch.comem.archioweb.tictactoe.requestJoinGame', [ gameId, playerId ]).then(joinedGame => {
-      displayNewGame(session, joinedGame, currentPlayer);
-    });
+function onGameAdded(session, game) {
+  viewManager.addGame(currentPlayer, game, function onJoinGame(gameId, playerId) {
+    session.call('ch.comem.archioweb.tictactoe.joinGame', [], { gameId, playerId }).then(result => {
+      startGame(session, result.game, currentPlayer);
+    }).catch(onError);
   });
 }
 
-function createNewGame(session) {
+function onGameMove(col, row, icon, status) {
+  viewManager.updateBoard(col, row, icon);
+
+  if (status === 'win') {
+    viewManager.displayToast(`${icon} wins!`);
+  } else if (status === 'draw') {
+    viewManager.displayToast('Draw!');
+  }
+}
+
+function onGameLeft(session, subscriptions, playerId) {
+
+  viewManager.displayToast(playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
+  viewManager.exitGame();
+
+  subscriptions.forEach(sub => session.unsubscribe(sub));
+}
+
+function createGame(session) {
   if (!currentPlayer) {
     return viewManager.displayToast('No player information available');
   }
 
-  session.call('ch.comem.archioweb.tictactoe.createNewGame', [ currentPlayer ]).then(newGame => {
-    displayNewGame(session, newGame, currentPlayer);
-  });
+  session.call('ch.comem.archioweb.tictactoe.createGame', [], { playerId: currentPlayer.id }).then(newGame => {
+    startGame(session, newGame, currentPlayer);
+  }).catch(onError);
 }
 
-function displayNewGame(session, game, player) {
+function startGame(session, game, player) {
+  currentGame = game;
+  const subscriptions = [];
 
-  let moveSubscription;
-  session.subscribe(`ch.comem.archioweb.tictactoe.games.${game.id}.moves`, function(args) {
+  session.subscribe(
+    `ch.comem.archioweb.tictactoe.games.${game.id}.played`,
+    (args, params) => onGameMove(params.col, params.row, params.icon, params.status)
+  ).then(sub => subscriptions.push(sub));
 
-    const row = args[0];
-    const col = args[1];
-    const icon = args[2];
-    const win = args[3];
-    const draw = args[4];
-    updateBoard(col, row, icon);
-
-    if (win) {
-      viewManager.displayToast(`${icon} wins!`);
-    } else if (draw) {
-      viewManager.displayToast('Draw!');
-    }
-  }).then(sub => {
-    moveSubscription = sub;
-  });
-
-  let exitedSubscription;
-  session.subscribe(`ch.comem.archioweb.tictactoe.games.${game.id}.exited`, function(args) {
-
-    const playerId = args[0];
-    viewManager.displayToast(playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
-    viewManager.exitGame();
-
-    if (exitedSubscription) {
-      session.unsubscribe(exitedSubscription);
-    }
-
-    if (moveSubscription) {
-      session.unsubscribe(moveSubscription);
-    }
-  }).then(sub => {
-    exitedSubscription = sub;
-  });
+  session.subscribe(
+    `ch.comem.archioweb.tictactoe.games.${game.id}.left`,
+    (args, params) => onGameLeft(session, subscriptions, params.playerId)
+  ).then(sub => subscriptions.push(sub));
 
   viewManager.displayGame(player, game, (col, row) => {
-    session.call('ch.comem.archioweb.tictactoe.updateBoard', [ game.id, player.id, col, row ]).catch(err => {
-      if (err.args && err.args.length) {
-        viewManager.displayToast(err.args[0]);
-      } else {
-        console.warn(err);
-      }
-    });
+    session.call('ch.comem.archioweb.tictactoe.play', [], { gameId: game.id, playerId: player.id, col, row }).catch(onError);
   });
 }
 
@@ -84,36 +79,28 @@ function exitGame(session) {
     return;
   }
 
-  session.call('ch.comem.archioweb.tictactoe.exitGame', [ currentGame.id, currentPlayer.id ]);
+  session.call('ch.comem.archioweb.tictactoe.exitGame', [], { gameId: currentGame.id, playerId: currentPlayer.id }).catch(onError);
 }
 
-function removeJoinableGame(gameId) {
+function onGameRemoved(gameId) {
   viewManager.removeGame(gameId);
-}
-
-function updateBoard(col, row, icon) {
-  viewManager.updateBoard(row, col, icon);
 }
 
 // PLAYER MANAGEMENT
 // =================
 
-/**
- * Example: store the player information
- *
- *     LCS_MANAGER.save('player', player);
- */
+function handleInitPlayerResult(session, player, games) {
+  currentPlayer = player;
 
-/**
- * Example: load the player information
- *
- *     const player = LCS_MANAGER.load('player');
- *     if (player) {
- *       // The stored player information is available.
- *     } else {
- *       // No player information is available.
- *     }
- */
+  viewManager.initEventManager(
+    () => createGame(session),
+    () => exitGame(session)
+  );
+
+  for (const game of games) {
+    onGameAdded(session, game);
+  }
+}
 
 // COMMUNICATIONS
 // ==============
@@ -133,30 +120,12 @@ const connection = new autobahn.Connection({
 connection.onopen = function(session) {
   console.log('Connection to WAMP router established');
 
-  session.call('ch.comem.archioweb.tictactoe.getPlayer', []).then(function(player) {
-    currentPlayer = player;
+  session.call('ch.comem.archioweb.tictactoe.initPlayer', []).then(result => {
+    handleInitPlayerResult(session, result.player, result.games);
+  }).catch(onError);
 
-    viewManager.initEventManager(
-      () => createNewGame(session),
-      () => exitGame(session)
-    );
-
-    session.call('ch.comem.archioweb.tictactoe.getJoinableGames', []).then(function(games) {
-      for (const game of games) {
-        addNewJoinableGame(session, game);
-      }
-    });
-  });
-
-  session.subscribe('ch.comem.archioweb.tictactoe.newGames', function(args) {
-    const game = args[0];
-    addNewJoinableGame(session, game);
-  });
-
-  session.subscribe('ch.comem.archioweb.tictactoe.removedGames', function(args) {
-    const gameId = args[0];
-    removeJoinableGame(gameId);
-  });
+  session.subscribe('ch.comem.archioweb.tictactoe.games.added', (args, params) => onGameAdded(session, params.game));
+  session.subscribe('ch.comem.archioweb.tictactoe.games.removed', (args, params) => onGameRemoved(params.gameId));
 };
 
 connection.open();

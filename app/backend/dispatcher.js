@@ -14,6 +14,61 @@ const playerController = new PlayerController(gameManager);
 // GAME MANAGEMENT
 // ===============
 
+function createGame(session, playerId) {
+  const newGame = gameController.createNewGame(playerId);
+  session.publish('ch.comem.archioweb.tictactoe.games.added', [], { game: newGame });
+  return newGame;
+}
+
+function joinGame(session, gameId, playerId) {
+
+  const result = gameController.joinGame(gameId, playerId);
+  if (result === 'invalidGame') {
+    throw [ 'No such game' ];
+  }
+
+  session.publish('ch.comem.archioweb.tictactoe.games.removed', [], { gameId });
+
+  return result;
+}
+
+function play(session, gameId, playerId, col, row) {
+
+  const result = gameController.play(gameId, playerId, col, row);
+  if (result === 'invalidGame') {
+    throw [ 'No such game' ];
+  } else if (result === 'invalidMove') {
+    throw [ 'Invalid move' ];
+  }
+
+  let status;
+  if (result.hasWin) {
+    status = 'win';
+  } else if (result.draw) {
+    status = 'draw';
+  }
+
+  session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.played`, [], { col, row, status, icon: result.playerIcon });
+}
+
+function exitGame(session, gameId, playerId) {
+
+  gameController.exitGame(gameId, playerId);
+
+  session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.left`, [], { playerId });
+  session.publish('ch.comem.archioweb.tictactoe.games.removed', [], { gameId });
+}
+
+// PLAYER MANAGEMENT
+// =================
+
+function initPlayer() {
+  return {
+    games: gameController.getJoinableGames(),
+    player: playerController.createPlayer()
+  };
+}
+
 // COMMUNICATIONS
 // ==============
 
@@ -33,61 +88,11 @@ exports.createDispatcher = function(server) {
 
   connection.onopen = function(session) {
     logger.info('Connection to WAMP router established');
-
-    session.register('ch.comem.archioweb.tictactoe.getPlayer', function() {
-      return playerController.createPlayer();
-    });
-
-    session.register('ch.comem.archioweb.tictactoe.getJoinableGames', function() {
-      return gameController.getJoinableGames();
-    });
-
-    session.register('ch.comem.archioweb.tictactoe.createNewGame', function(args) {
-      const player = args[0];
-      const newGame = gameController.createNewGame(player.id);
-      session.publish('ch.comem.archioweb.tictactoe.newGames', [ newGame ]);
-      return newGame;
-    });
-
-    session.register('ch.comem.archioweb.tictactoe.requestJoinGame', function(args) {
-
-      const gameId = args[0];
-      const playerId = args[1];
-      const result = gameController.joinGame(gameId, playerId);
-      if (result === 'invalidGame') {
-        throw new Error('Invalid game');
-      }
-
-      session.publish('ch.comem.archioweb.tictactoe.removedGames', [ result.game.id ]);
-
-      return result.game;
-    });
-
-    session.register('ch.comem.archioweb.tictactoe.exitGame', function(args) {
-
-      const gameId = args[0];
-      const playerId = args[1];
-      gameController.exitGame(gameId, playerId);
-
-      session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.exited`, [ playerId ]);
-      session.publish('ch.comem.archioweb.tictactoe.removedGames', [ gameId ]);
-    });
-
-    session.register('ch.comem.archioweb.tictactoe.updateBoard', function(args) {
-
-      const gameId = args[0];
-      const playerId = args[1];
-      const row = args[2];
-      const col = args[3];
-      const result = gameController.play(gameId, playerId, col, row);
-      if (result === 'invalidGame') {
-        throw [ 'No such game' ];
-      } else if (result === 'invalidMove') {
-        throw [ 'Invalid move' ];
-      }
-
-      session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.moves`, [ row, col, result.playerIcon, result.hasWin, result.draw ]);
-    });
+    session.register('ch.comem.archioweb.tictactoe.initPlayer', initPlayer);
+    session.register('ch.comem.archioweb.tictactoe.createGame', (args, params) => createGame(session, params.playerId));
+    session.register('ch.comem.archioweb.tictactoe.joinGame', (args, params) => joinGame(session, params.gameId, params.playerId));
+    session.register('ch.comem.archioweb.tictactoe.exitGame', (args, params) => exitGame(session, params.gameId, params.playerId));
+    session.register('ch.comem.archioweb.tictactoe.play', (args, params) => play(session, params.gameId, params.playerId, params.col, params.row));
   };
 
   connection.open();
