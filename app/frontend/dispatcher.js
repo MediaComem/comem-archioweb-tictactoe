@@ -70,7 +70,7 @@ function onUpdateGame(col, row, icon, status) {
 
 function onAddGames(ws, games) {
   games.forEach(game => {
-    viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
+    viewManager.addGame(currentPlayer, game, (gameId, playerId) => {
       ws.send(JSON.stringify({
         resource: 'game',
         command: 'joinGame',

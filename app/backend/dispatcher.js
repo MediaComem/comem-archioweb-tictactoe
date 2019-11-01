@@ -119,7 +119,7 @@ const gameDispatcher = (command, params, actualPlayer) => {
         }
       }));
 
-      joinGameResult.players.forEach(player => {
+      gameManager.players.forEach(player => {
         clients[player.id].send(JSON.stringify({
           resource: 'game',
           command: 'removeGame',
