@@ -28,7 +28,7 @@ module.exports = class {
     this.TOAST.toast('show');
   }
 
-  displayNewGame(player, game, fncUpdateBoardRequest) {
+  displayGame(player, game, fncUpdateBoardRequest) {
     const gameInstance = new Game();
     Object.assign(gameInstance, game);
 
@@ -42,7 +42,7 @@ module.exports = class {
         boardBtn.addClass('EMPTY');
 
         boardBtn.on('click', () => {
-          fncUpdateBoardRequest(i, j);
+          fncUpdateBoardRequest(j, i);
         });
 
         this.BOARD_GRID.append(boardBtn);
@@ -71,11 +71,11 @@ module.exports = class {
   addNewJoinableGame(player, game, fncRequestJoinGame) {
     const joinableGame = this.TMP_JOINABLE_GAME.clone();
 
-    joinableGame.attr('data-player', `${game.players[0].id} - ${game.players[0].username}`);
-    joinableGame.attr('data-gameid', `${game.id}`);
+    joinableGame.attr('data-playerid', String(game.players[0].id));
+    joinableGame.attr('data-gameid', String(game.id));
 
-    $('.playerid', joinableGame).text(`${game.players[0].id}`);
-    $('.playername', joinableGame).text(game.players[0].username);
+    $('.playerid', joinableGame).text('');
+    $('.playername', joinableGame).text(`Game by player ${game.players[0].id}`);
 
     $('.join-btn', joinableGame).on('click', () => {
       fncRequestJoinGame(game.id, player.id);
@@ -84,9 +84,9 @@ module.exports = class {
     $('.games', this.SHOWGAME_CONTAINER).append(joinableGame);
   }
 
-  removeJoinableGame(gameId) {
+  removeGame(gameId) {
     $('.games', this.SHOWGAME_CONTAINER).children().each((i, ele) => {
-      if ($(ele).attr('data-gameid') === gameId) {
+      if ($(ele).attr('data-gameid') === String(gameId)) {
         $(ele).fadeOut('fast').remove();
       }
     });
@@ -109,7 +109,7 @@ module.exports = class {
 
       this.GAMES_CONTAINER.children().each((i, ele) => {
         console.log(ele.innerHTML);
-        if ($(ele).attr('data-player').includes(inputText) || inputText === '') {
+        if ($(ele).attr('data-playerid').includes(inputText) || inputText === '') {
           $(ele).fadeIn('slow');
         } else {
           $(ele).fadeOut('slow');
