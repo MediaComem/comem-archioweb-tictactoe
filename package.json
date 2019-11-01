@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./app/backend/index.js",
     "back-watch": "nodemon --ignore app/frontend/ ./app/backend/index.js",
-    "front-watch": "npx webpack --watch --mode=\"development\"",
-    "front-build": "npx webpack --mode=\"production\"",
+    "front-watch": "webpack-cli --watch --mode=\"development\"",
+    "front-build": "webpack-cli --mode=\"production\"",
     "docker-build": "docker build -t tic-tac-toe-websocket ."
   },
   "author": "arthur.verdon@heig-vd.ch",
