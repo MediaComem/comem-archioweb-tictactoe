@@ -1,11 +1,22 @@
 /* eslint-disable no-unused-vars */
 const GameManager = require('../class/game-manager.class');
+const { createLogger } = require('./config');
 const GameController = require('./controller/game.controller');
 const PlayerController = require('./controller/player.controller');
 
 const gameManager = new GameManager();
-const playerController = new PlayerController(gameManager);
 const gameController = new GameController(gameManager);
+const logger = createLogger('dispatcher');
+const playerController = new PlayerController(gameManager);
+
+/**
+ * Example: log a message
+ *
+ *     logger.debug('Detailed debug message');
+ *     logger.info('Informational message');
+ *     logger.warn('Warning message');
+ *     logger.error('Error message');
+ */
 
 // GAME MANAGEMENT
 // ===============
@@ -69,4 +80,6 @@ const gameController = new GameController(gameManager);
 // COMMUNICATIONS
 // ==============
 
-// TODO: implement the backend's communications with WebSockets or the Web Application Messaging Protocol (WAMP).
+exports.createDispatcher = function(server) {
+  // TODO: implement the backend's communications with WebSockets or the Web Application Messaging Protocol (WAMP).
+};
