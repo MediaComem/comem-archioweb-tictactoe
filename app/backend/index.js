@@ -14,4 +14,4 @@ app.listen(PORT, () => {
   console.log(`=== LISTENING ON ${PORT} ===`);
 });
 
-require('./ws-backend-dispatcher');
+require('./dispatcher');
