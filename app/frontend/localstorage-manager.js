@@ -1,9 +1,12 @@
+// Storing values in memory is sufficient for this demonstration.
+const store = {};
+
 module.exports = {
     save(key, data) {
-        localStorage.setItem(key, JSON.stringify(data))
+        store[key] = JSON.stringify(data);
     },
 
     load(key) {
-        return JSON.parse(localStorage.getItem(key))
+        return JSON.parse(store[key]);
     }
 }
