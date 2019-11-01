@@ -14,6 +14,7 @@
   "author": "arthur.verdon@heig-vd.ch",
   "license": "MIT",
   "dependencies": {
+    "autobahn": "^19.10.1",
     "bootstrap": "^4.3.1",
     "express": "^4.17.1",
     "jquery": "^3.4.1",
@@ -31,6 +32,6 @@
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.0",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "webpack-cli": "^3.3.10"
   }
 }
