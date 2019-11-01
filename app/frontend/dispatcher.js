@@ -1,5 +1,7 @@
-const LCS_MANAGER = require('./localstorage-manager');
 const ViewManager = require('./view-manager');
+
+let currentGame;
+let currentPlayer;
 
 const viewManager = new ViewManager();
 
@@ -7,44 +9,37 @@ const viewManager = new ViewManager();
 // ===============
 
 const createNewGame = ws => {
-  const player = LCS_MANAGER.load('player');
-
-  if (!player) {
-    console.error('No player defined');
-    return;
+  if (!currentPlayer) {
+    return viewManager.displayToast('No player information available');
   }
 
   ws.send(JSON.stringify({
     resource: 'game',
     command: 'createNewGame',
-    params: [ player.id ]
+    params: [ currentPlayer.id ]
   }));
 };
 
 const exitGameRequest = ws => {
-  const game = LCS_MANAGER.load('game');
-  const player = LCS_MANAGER.load('player');
-
-  if (!game || !player) {
+  if (!currentGame || !currentPlayer) {
     return;
   }
 
   ws.send(JSON.stringify({
     resource: 'game',
     command: 'exitGame',
-    params: [ game.id, player.id ]
+    params: [ currentGame.id, currentPlayer.id ]
   }));
 };
 
 const displayNewGame = (ws, game) => {
-  const player = LCS_MANAGER.load('player');
-  LCS_MANAGER.save('game', game);
+  currentGame = game;
 
-  viewManager.displayNewGame(player, game, (col, row) => {
+  viewManager.displayNewGame(currentPlayer, game, (col, row) => {
     ws.send(JSON.stringify({
       resource: 'game',
       command: 'updateBoardRequest',
-      params: [ game.id, player.id, col, row ]
+      params: [ game.id, currentPlayer.id, col, row ]
     }));
   });
 };
@@ -54,9 +49,7 @@ const updateBoard = (row, col, icon) => {
 };
 
 const addNewJoinableGame = (ws, game) => {
-  const player = LCS_MANAGER.load('player');
-
-  viewManager.addNewJoinableGame(player, game, (gameId, playerId) => {
+  viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
     ws.send(JSON.stringify({
       resource: 'game',
       command: 'requestJoinGame',
@@ -125,7 +118,7 @@ const dispatchGameCommand = (command, params, ws) => {
 // =================
 
 const receiveMyPlayer = playerFromServer => {
-  LCS_MANAGER.save('player', playerFromServer);
+  currentPlayer = playerFromServer;
 };
 
 const dispatchPlayerCommand = (command, params) => {
