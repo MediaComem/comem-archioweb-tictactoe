@@ -1,39 +1,35 @@
+/* eslint-disable no-unused-vars */
 const autobahn = require('autobahn');
 
-const LCS_MANAGER = require('./localstorage-manager')
-const ViewManager = require('./view-manager')
+const ViewManager = require('./view-manager');
 
-// ----------------------------------- CONSTANT DEFINITION
+let currentGame;
+let currentPlayer;
 
-// ----------------------------------- WEBSOCKET INIT
+const viewManager = new ViewManager();
 
+// GAME MANAGEMENT
+// ===============
 
-const viewManager = new ViewManager()
-
-// ----------------------------------- GAME MANAGEMENT    
 function addNewJoinableGame(session, game) {
-  const player = LCS_MANAGER.load('player');
-  viewManager.addNewJoinableGame(player, game, (gameId, playerId) => {
+  viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
     session.call('ch.comem.archioweb.tictactoe.requestJoinGame', [ gameId, playerId ]).then(joinedGame => {
-      displayNewGame(session, joinedGame, player);
+      displayNewGame(session, joinedGame, currentPlayer);
     });
   });
 }
 
 function createNewGame(session) {
-
-  const player = LCS_MANAGER.load('player');
-  if (!player) {
-    return viewManager.displayToast('No player defined');
+  if (!currentPlayer) {
+    return viewManager.displayToast('No player information available');
   }
 
-  session.call('ch.comem.archioweb.tictactoe.createNewGame', [ player ]).then(newGame => {
-    displayNewGame(session, newGame, player);
+  session.call('ch.comem.archioweb.tictactoe.createNewGame', [ currentPlayer ]).then(newGame => {
+    displayNewGame(session, newGame, currentPlayer);
   });
 }
 
 function displayNewGame(session, game, player) {
-  LCS_MANAGER.save('game', game);
 
   let moveSubscription;
   session.subscribe(`ch.comem.archioweb.tictactoe.games.${game.id}.moves`, function(args) {
@@ -50,14 +46,15 @@ function displayNewGame(session, game, player) {
     } else if (draw) {
       viewManager.displayToast('Draw!');
     }
-  }).then(sub => moveSubscription = sub);
+  }).then(sub => {
+    moveSubscription = sub;
+  });
 
   let exitedSubscription;
   session.subscribe(`ch.comem.archioweb.tictactoe.games.${game.id}.exited`, function(args) {
 
     const playerId = args[0];
-    const player = LCS_MANAGER.load('player');
-    viewManager.displayToast(playerId === player.id ? 'You have left the game' : 'Your opponent has left the game');
+    viewManager.displayToast(playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
     viewManager.exitGame();
 
     if (exitedSubscription) {
@@ -67,9 +64,11 @@ function displayNewGame(session, game, player) {
     if (moveSubscription) {
       session.unsubscribe(moveSubscription);
     }
-  }).then(sub => exitedSubscription = sub);
+  }).then(sub => {
+    exitedSubscription = sub;
+  });
 
-  viewManager.displayNewGame(player, game, (col, row) => {
+  viewManager.displayGame(player, game, (col, row) => {
     session.call('ch.comem.archioweb.tictactoe.updateBoard', [ game.id, player.id, col, row ]).catch(err => {
       if (err.args && err.args.length) {
         viewManager.displayToast(err.args[0]);
@@ -81,45 +80,61 @@ function displayNewGame(session, game, player) {
 }
 
 function exitGame(session) {
-
-  const game = LCS_MANAGER.load('game');
-  const player = LCS_MANAGER.load('player');
-  if (!game || !player) {
+  if (!currentGame || !currentPlayer) {
     return;
   }
 
-  session.call('ch.comem.archioweb.tictactoe.exitGame', [ game.id, player.id ]);
+  session.call('ch.comem.archioweb.tictactoe.exitGame', [ currentGame.id, currentPlayer.id ]);
 }
 
 function removeJoinableGame(gameId) {
-  viewManager.removeJoinableGame(gameId);
+  viewManager.removeGame(gameId);
 }
 
 function updateBoard(col, row, icon) {
   viewManager.updateBoard(row, col, icon);
 }
 
+// PLAYER MANAGEMENT
+// =================
 
-// ----------------------------------- PLAYER MANAGEMENT
+/**
+ * Example: store the player information
+ *
+ *     LCS_MANAGER.save('player', player);
+ */
 
+/**
+ * Example: load the player information
+ *
+ *     const player = LCS_MANAGER.load('player');
+ *     if (player) {
+ *       // The stored player information is available.
+ *     } else {
+ *       // No player information is available.
+ *     }
+ */
 
-// ----------------------------------- WEBSOCKET MANAGEMENT
+// COMMUNICATIONS
+// ==============
+
 const connection = new autobahn.Connection({
   url: 'wss://wamp.archidep.media/ws',
   realm: 'realm1'
-  /*authid: 'jdoe',
-  authmethods: [ 'ticket' ],
-  onchallenge: function() {
-    console.log('@@@ on challenge', JSON.stringify(Array.prototype.slice(arguments)));
-    return 'letmein';
-  }*/
+  // Authentication:
+  // authid: 'jdoe',
+  // authmethods: [ 'ticket' ],
+  // onchallenge: function() {
+  // console.log('@@@ on challenge', JSON.stringify(Array.prototype.slice(arguments)));
+  // return 'letmein';
+  // }
 });
 
 connection.onopen = function(session) {
   console.log('Connection to WAMP router established');
 
   session.call('ch.comem.archioweb.tictactoe.getPlayer', []).then(function(player) {
-    LCS_MANAGER.save('player', player);
+    currentPlayer = player;
 
     viewManager.initEventManager(
       () => createNewGame(session),
