@@ -1,1 +1,4 @@
-node_modules
+/inventory*
+!/inventory.sample.yml
+/node_modules
+/public/js/build.js

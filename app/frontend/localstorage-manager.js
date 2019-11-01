@@ -2,11 +2,11 @@
 const store = {};
 
 module.exports = {
-    save(key, data) {
-        store[key] = JSON.stringify(data);
-    },
+  save(key, data) {
+    store[key] = JSON.stringify(data);
+  },
 
-    load(key) {
-        return JSON.parse(store[key]);
-    }
-}
+  load(key) {
+    return JSON.parse(store[key]);
+  }
+};

@@ -1,0 +1,9 @@
+---
+all:
+  hosts:
+    aws:
+      ansible_host: 1.2.3.4
+      ansible_user: root
+  vars:
+    server_email: john.doe@example.com
+    server_hostname: wamp.example.com

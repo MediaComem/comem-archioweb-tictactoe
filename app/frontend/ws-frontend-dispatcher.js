@@ -1,180 +1,103 @@
-const LCS_MANAGER = require('./localstorage-manager')
-const ViewManager = require('./view-manager')
+/* eslint-disable no-unused-vars */
+const LCS_MANAGER = require('./localstorage-manager');
+const ViewManager = require('./view-manager');
 
-// ----------------------------------- CONSTANT DEFINITION
-const WS_URL = `ws://${window.location.hostname}:${Number.parseInt(window.location.port) + 1}`
+const viewManager = new ViewManager();
 
-// ----------------------------------- WEBSOCKET INIT
-let ws = new WebSocket(WS_URL)
+// GAME MANAGEMENT
+// ===============
 
-const viewManager = new ViewManager()
+/**
+ * Example: store the game information
+ *
+ *     LCS_MANAGER.save('game', game);
+ */
 
-// ----------------------------------- GAME MANAGEMENT    
+/**
+ * Example: load the game information
+ *
+ *     const game = LCS_MANAGER.load('game');
+ *     if (game) {
+ *       // The stored game information is available.
+ *     } else {
+ *       // No game information is available.
+ *     }
+ */
 
-const createNewGame = (ws) => {
-    let player = LCS_MANAGER.load('player')
+/**
+ * Example: handle creating & exiting games
+ *
+ *     viewManager.initEventManager(
+ *       function createGame() {
+ *         // The player has clicked the Create Game button.
+ *       },
+ *       function exitGame() {
+ *         // The player has clicked the Exit Game button.
+ *       }
+ *     );
+ */
 
-    if (!player) {
-        console.error('No player defined')
-        return
-    }
+/**
+ * Example: start a game
+ *
+ *     viewManager.displayNewGame(player, game, function play(col, row) {
+ *       // The player has clicked in the col,row cell.
+ *     });
+ */
 
-    ws.send(JSON.stringify({
-        resource: 'game',
-        command: 'createNewGame',
-        params: [player]
-    }))
-}
+/**
+ * Example: update the board
+ *
+ *     viewManager.updateBoard(col, row, icon);
+ */
 
-const exitGameRequest = (ws) => {
-    let game = LCS_MANAGER.load('game')
-    let player = LCS_MANAGER.load('player')
+/**
+ * Example: add a new joinable game
+ *
+ *     viewManager.addNewJoinableGame(player, game, function requestJoinGame(gameId, playerId) {
+ *       // The player has requested to join this game.
+ *     });
+ */
 
-    if (!game || !player) {
-        return
-    }
+/**
+ * Example: remove a joinable game
+ *
+ *     viewManager.removeJoinableGame(gameId);
+ */
 
-    ws.send(JSON.stringify({
-        resource: 'game',
-        command: 'exitGame',
-        params: [game.id, player.id]
-    }))
-}
+/**
+ * Example: exit the current game
+ *
+ *     viewManager.exitGame();
+ */
 
-const displayNewGame = (ws, game) => {
-    let player = LCS_MANAGER.load('player')
-    LCS_MANAGER.save('game', game)
-    
-    viewManager.displayNewGame(player, game, (col, row) => {
-            ws.send(JSON.stringify({
-                resource: 'game',
-                command: 'updateBoardRequest',
-                params: [game.id, player.id, col, row]
-            }))
-        })
-}
+/**
+ * Example: display a toast message
+ *
+ *     viewManager.displayToast('Hello World');
+ */
 
-const updateBoard = (row, col, icon) => {
-    viewManager.updateBoard(row, col, icon)
-}
+// PLAYER MANAGEMENT
+// =================
 
-const addNewJoinableGame = (ws, game) => {
-    let player = LCS_MANAGER.load('player')
+/**
+ * Example: store the player information
+ *
+ *     LCS_MANAGER.save('player', player);
+ */
 
-    viewManager.addNewJoinableGame(player, game, (gameId, playerId) => {
-        ws.send(JSON.stringify({
-            resource: 'game',
-            command: 'requestJoinGame',
-            params: [gameId, playerId]
-        }))
-    })
-}
+/**
+ * Example: load the player information
+ *
+ *     const player = LCS_MANAGER.load('player');
+ *     if (player) {
+ *       // The stored player information is available.
+ *     } else {
+ *       // No player information is available.
+ *     }
+ */
 
-const removeJoinableGame = (gameId) => {
-    viewManager.removeJoinableGame(gameId)
-}
+// COMMUNICATIONS
+// ==============
 
-const exitGame = () => {
-    viewManager.exitGame()
-}
-
-const dispatchGameCommand = (command, params, ws) => {
-    switch (command) {
-        case 'newJoinableGame':
-            let newJoinableGame = params[0]
-            addNewJoinableGame(ws, newJoinableGame)
-            break;
-
-        case 'displayNewGame':
-            let newGame = params[0]
-            displayNewGame(ws, newGame)
-            break;
-
-        case 'updateBoard':
-            let row = params[0]
-            let col = params[1]
-            let icon = params[2]
-            updateBoard(row, col, icon)
-            break;
-
-        case 'winMove':
-            let winIcon = params[1]
-            viewManager.displayToast(`${winIcon} win.`)
-            break;
-
-        case 'drawMove':
-            viewManager.displayToast('Draw !')
-            break;
-
-        case 'invalidMove':
-            viewManager.displayToast('Move invalid')
-            break;
-
-        case 'removeJoinableGame':
-            let gameToRemove = params[0]
-            removeJoinableGame(gameToRemove)
-            break;
-
-        case 'invalidGame':
-            break;
-
-        case 'exitGame':
-            let exitMsg = params[0]
-            viewManager.displayToast(exitMsg)
-            exitGame(ws)
-            break;
-    }
-}
-
-// ----------------------------------- PLAYER MANAGEMENT
-
-const receiveMyPlayer = (playerFromServer) => {
-    LCS_MANAGER.save('player', playerFromServer)
-}
-
-const dispatchPlayerCommand = (command, params, ws) => {
-    switch (command) {
-        case 'receiveMyPlayer':
-            let playerFromServer = params[0]
-            receiveMyPlayer(playerFromServer)
-            break;
-    }
-}
-
-// ----------------------------------- WEBSOCKET MANAGEMENT
-ws.onopen = (e) => {
-    console.log("=== CONNECTION OPEN WITH WEBSOCKET ===")
-
-    // ----------------------------------- DOM EVENT MANAGEMENT
-    viewManager.initEventManager(
-        () => createNewGame(ws),
-        () => exitGameRequest(ws)
-    )
-
-    ws.onmessage = (msg) => {
-        console.log('=== NEW MESSAGE ===')
-        let msgData = JSON.parse(msg.data)
-        console.log(msgData)
-        /*
-            Message data structure :
-            {
-                'resource':'[RESOURCE_NAME]'.
-                'command':'[COMMAND_NAME]',
-                'params': [
-                    {'param1':'zzz'},
-                    ...
-                ]
-            }
-        */
-
-        switch (msgData.resource) {
-            case 'game':
-                dispatchGameCommand(msgData.command, msgData.params, ws)
-                break;
-
-            case 'player':
-                dispatchPlayerCommand(msgData.command, msgData.params, ws)
-                break;
-        }
-    }
-}
+// TODO: implement the frontend's communications with WebSockets or the Web Application Messaging Protocol (WAMP).

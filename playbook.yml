@@ -1,0 +1,202 @@
+---
+- hosts: all
+  become: true
+  gather_facts: no
+
+  vars:
+    docker_compose_version: 1.24.1
+    docker_version: 5:19.03.4~3-0~ubuntu-bionic
+
+  handlers:
+
+    - name: Restart docker
+      service:
+        name: docker
+        state: restarted
+
+  tasks:
+
+    # Make sure Python 3 is installed before doing anything.
+    - name: Install Python & pip
+      raw: "command -v python3 && command -v pip3 || { apt-get update && apt-get install -y python3 python3-apt python3-pip; }"
+      changed_when: false
+      tags: [ always, install ]
+
+    # Gather ansible facts (requires python). Facts are required for many Ansible
+    # modules to work correctly.
+    - name: Gather facts
+      setup:
+      tags: [ always ]
+
+    - name: Set hostname
+      hostname:
+        name: "{{ server_hostname }}"
+      tags: [ install ]
+
+    - name: Add Docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      tags: [ docker, install ]
+
+    - name: Add Docker apt repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+      tags: [ docker, install ]
+
+    - name: Install Docker
+      apt:
+        name: docker-ce={{ docker_version }}
+        update_cache: yes
+        state: present
+      tags: [ docker, install ]
+
+    - name: Configure Docker daemon
+      template:
+        src: daemon.json
+        dest: /etc/docker/daemon.json
+      notify: Restart docker
+      tags: [ docker, config ]
+
+    - name: Install docker-py
+      pip:
+        name: docker-py
+      tags: [ docker, install ]
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-{{ ansible_architecture }}
+        dest: /usr/local/bin/docker-compose
+        force: true
+        owner: root
+        group: root
+        mode: 0755
+      tags: [ docker-compose, install ]
+
+    - name: Install Certbot dependencies
+      apt:
+        name: software-properties-common
+        update_cache: yes
+        state: present
+      tags: [ certbot, install ]
+
+    - name: Add Certbot APT repository
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - deb http://archive.ubuntu.com/ubuntu/ bionic universe
+        - ppa:certbot/certbot
+      tags: [ certbot, install ]
+
+    - name: Install Certbot
+      apt:
+        name: certbot
+        update_cache: yes
+        state: present
+      tags: [ certbot, install ]
+
+    - name: Check if a Let's Encrypt account exists
+      shell: ls -A /etc/letsencrypt/accounts || echo ''
+      changed_when: false
+      check_mode: no
+      register: certbot_account_exists
+      tags: [ certbot, generic ]
+
+    - name: Register Let's Encrypt account
+      command: certbot register -n --agree-tos -m {{ server_email }} --no-eff-email
+      when: certbot_account_exists.stdout == ''
+      tags: [ certbot, install ]
+
+    - name: Create WAMP configuration directory
+      file:
+        path: /etc/wamp
+        owner: root
+        group: root
+        mode: 0750
+        state: directory
+      tags: [ config, wamp ]
+
+    - name: Create WAMP docker-compose.yml file
+      template:
+        src: docker-compose.yml
+        dest: /etc/wamp/docker-compose.yml
+        owner: root
+        group: root
+        mode: 0640
+      tags: [ config, wamp ]
+
+    - name: Create WAMP router configuration file
+      template:
+        src: config.json
+        dest: /etc/wamp/config.json
+        owner: root
+        group: root
+        mode: 0644
+      tags: [ config, wamp ]
+
+    - name: Create WAMP web directory
+      file:
+        path: /var/www/wamp
+        owner: root
+        group: root
+        mode: 0755
+        state: directory
+      tags: [ install, wamp ]
+
+    - name: Create WAMP welcome page
+      template:
+        src: index.html
+        dest: /var/www/wamp/index.html
+        owner: root
+        group: root
+        mode: 0644
+      tags: [ wamp ]
+
+    - name: Run crossbar.io router
+      command: docker-compose up -d router
+      args:
+        chdir: /etc/wamp
+      tags: [ wamp ]
+
+    # TODO: deploy insecure WAMP router before doing this
+    - name: Obtain Let's Encrypt certificate
+      command: certbot certonly -n --webroot --cert-name wamp -w /var/www/wamp -d {{ server_hostname }}
+      args:
+        creates: /etc/letsencrypt/live/wamp
+      tags: [ certbot ]
+
+    - name: Auto-renew Let's Encrypt certificate every day
+      cron:
+        name: "Renew letsencrypt certificates"
+        minute: "0"
+        hour: "1"
+        job: "/usr/bin/certbot renew 1>/dev/stdout 2>/dev/stderr"
+      tags: [ certbot ]
+
+    - name: Create WAMP SSL directory
+      file:
+        path: /etc/wamp/ssl
+        owner: root
+        group: root
+        mode: 0755
+        state: directory
+      tags: [ certbot ]
+
+    - name: Create WAMP certificate update script
+      template:
+        src: update-cert.sh
+        dest: /usr/local/bin/update-wamp-cert
+        owner: root
+        group: root
+        mode: 0750
+      tags: [ certbot ]
+
+    - name: Update WAMP certificate every day
+      cron:
+        name: "Update WAMP certificate"
+        minute: "0"
+        hour: "2"
+        job: "/usr/local/bin/update-wamp-cert 1>/dev/stdout 2>/dev/stderr"
+      tags: [ certbot ]

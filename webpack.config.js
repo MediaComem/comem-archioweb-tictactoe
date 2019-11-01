@@ -8,7 +8,11 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader'
+      },
       {
         test: /\.s[ac]ss$/i,
         use: [
@@ -21,5 +25,9 @@ module.exports = {
         ],
       },
     ],
+  },
+  performance: {
+    maxAssetSize: 1024 * 1024,
+    maxEntrypointSize: 512 * 1024
   }
 };

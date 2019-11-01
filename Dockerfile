@@ -6,8 +6,7 @@ LABEL name="tic-tac-toe-websocket" \
 
 WORKDIR /usr/src/app
 
-ENV NODE_ENV=production \
-    SERVER_PORT=8080 \
+ENV SERVER_PORT=8080 \
     WEBSOCKET_PORT=8081
 
 COPY package.json package-lock.json /usr/src/app/
@@ -19,6 +18,9 @@ RUN apk --no-cache add \
     npm install
 
 COPY . /usr/src/app/
+
+RUN npm run lint && \
+    npm run front-build
 
 EXPOSE $SERVER_PORT $WEBSOCKET_PORT
 
