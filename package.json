@@ -8,7 +8,7 @@
     "docker:build": "docker build -t tic-tac-toe-real-time .",
     "frontend:build": "webpack-cli --mode=\"production\"",
     "frontend:watch": "webpack-cli --watch --mode=\"development\"",
-    "lint": "eslint app",
+    "lint": "eslint app webpack.config.js",
     "lint:watch": "onchange \"app/backend/bin/www\" \"app/**/*.js\" -- npm run lint",
     "start": "node ./app/backend/bin/www",
     "start:watch": "concurrently \"npm run backend:watch\" \"npm run frontend:watch\""
