@@ -1,10 +1,9 @@
 {
-  "name": "tic-tac-toe-websocket",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "name": "tic-tac-toe-real-time",
+  "version": "1.0.0",
+  "description": "An exercise to implement a real-time tic-tac-toe with WebSockets or the Web Application Messaging Protocol (WAMP).",
+  "main": "app/backend/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./app/backend/index.js",
     "back-watch": "nodemon --ignore app/frontend/ ./app/backend/index.js",
     "front-watch": "webpack-cli --watch --mode=\"development\"",
@@ -12,6 +11,12 @@
     "docker-build": "docker build -t tic-tac-toe-websocket ."
   },
   "author": "arthur.verdon@heig-vd.ch",
+  "contributors": [
+    {
+      "name": "Simon Oulevay",
+      "email": "simon.oulevay@heig-vd.ch"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
     "bootstrap": "^4.3.1",
@@ -31,5 +36,8 @@
     "style-loader": "^1.0.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
+  },
+  "engines": {
+    "node": "^12.0.0"
   }
 }
