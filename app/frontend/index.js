@@ -4,5 +4,5 @@ const $ = require('jquery');
 require('bootstrap/dist/js/bootstrap');
 
 $(() => {
-  require('./ws-frontend-dispatcher');
+  require('./dispatcher');
 });
