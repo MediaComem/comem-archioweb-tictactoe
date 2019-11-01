@@ -45,17 +45,19 @@ module.exports = class {
   }
 
   joinGame(gameId, playerId) {
+
     const game = this.gameManager.findGameById(gameId);
     const player = this.gameManager.findPlayerById(playerId);
-
-    if (game.addNewPlayer(player)) {
-      game.state = Game.STATE.RUNNING;
-
-      return { game: game, players: this.gameManager.players };
-    } else {
+    if (!game.addNewPlayer(player)) {
       return 'invalidGame';
     }
 
+    game.state = Game.STATE.RUNNING;
+
+    return {
+      game,
+      player
+    };
   }
 
   exitGame(gameId, playerId) {

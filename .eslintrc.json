@@ -54,7 +54,7 @@
     "eqeqeq": [ "error" ],
     "eol-last": [ "error" ],
     "func-call-spacing": [ "error", "never" ],
-    "func-names": [ "error", "never" ],
+    "func-names": [ "off" ],
     "function-paren-newline": [ "error", "consistent" ],
     "handle-callback-err": [ "error" ],
     "id-blacklist": [ "error", "isNull", "isNumber", "isUndefined" ],
