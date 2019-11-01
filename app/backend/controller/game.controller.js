@@ -15,7 +15,7 @@ module.exports = class {
   }
 
   getJoinableGames() {
-    return this.gameManager.getAllCreatedGames();
+    return this.gameManager.getCreatedGames();
   }
 
   play(gameId, playerId, col, row) {

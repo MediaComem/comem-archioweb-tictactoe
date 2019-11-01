@@ -14,7 +14,7 @@ module.exports = class {
     this.games.push(game);
   }
 
-  getAllCreatedGames() {
+  getCreatedGames() {
     return this.games.filter(game => game.state === Game.STATE.CREATED);
   }
 
