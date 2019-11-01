@@ -19,7 +19,8 @@ RUN apk --no-cache add \
 
 COPY . /usr/src/app/
 
-RUN npm run front-build
+RUN npm run lint && \
+    npm run front-build
 
 EXPOSE $SERVER_PORT $WEBSOCKET_PORT
 

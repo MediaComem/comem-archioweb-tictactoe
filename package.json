@@ -8,7 +8,8 @@
     "back-watch": "nodemon --ignore app/frontend/ ./app/backend/index.js",
     "front-watch": "webpack-cli --watch --mode=\"development\"",
     "front-build": "webpack-cli --mode=\"production\"",
-    "docker-build": "docker build -t tic-tac-toe-websocket ."
+    "docker-build": "docker build -t tic-tac-toe-websocket .",
+    "lint": "eslint app"
   },
   "author": "arthur.verdon@heig-vd.ch",
   "contributors": [
@@ -28,8 +29,11 @@
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
+    "eslint": "^6.6.0",
+    "eslint-plugin-sort-requires-by-path": "^1.0.2",
     "node-sass": "^4.12.0",
     "nodemon": "^1.19.4",
     "sass-loader": "^8.0.0",
