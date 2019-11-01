@@ -68,7 +68,7 @@ module.exports = class {
     this.BOARD_GRID.addClass(`${icon.toUpperCase() === 'O' ? 'X' : 'O'}-turn`);
   }
 
-  addNewJoinableGame(player, game, fncRequestJoinGame) {
+  addGame(player, game, fncRequestJoinGame) {
     const joinableGame = this.TMP_JOINABLE_GAME.clone();
 
     joinableGame.attr('data-playerid', String(game.players[0].id));
