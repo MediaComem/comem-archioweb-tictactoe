@@ -16,6 +16,7 @@ const playerController = new PlayerController(gameManager);
 
 function createGame(session, playerId) {
   const newGame = gameController.createNewGame(playerId);
+  logger.info(`Player ${playerId} created game ${newGame.id}`);
   session.publish('ch.comem.archioweb.tictactoe.games.added', [], { game: newGame });
   return newGame;
 }
@@ -27,6 +28,7 @@ function joinGame(session, gameId, playerId) {
     throw [ 'No such game' ];
   }
 
+  logger.info(`Player ${playerId} joined game ${gameId}`);
   session.publish('ch.comem.archioweb.tictactoe.games.removed', [], { gameId });
 
   return result;
@@ -41,11 +43,17 @@ function play(session, gameId, playerId, col, row) {
     throw [ 'Invalid move' ];
   }
 
+  logger.info(`Player ${playerId} played ${col},${row} in game ${gameId}`);
+
   let status;
   if (result.hasWin) {
     status = 'win';
   } else if (result.draw) {
     status = 'draw';
+  }
+
+  if (status) {
+    logger.info(`Game ${gameId} is a ${status}`);
   }
 
   session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.played`, [], { col, row, status, icon: result.playerIcon });
@@ -54,6 +62,7 @@ function play(session, gameId, playerId, col, row) {
 function exitGame(session, gameId, playerId) {
 
   gameController.exitGame(gameId, playerId);
+  logger.info(`Player ${playerId} left game ${gameId}`);
 
   session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.left`, [], { playerId });
   session.publish('ch.comem.archioweb.tictactoe.games.removed', [], { gameId });
@@ -63,9 +72,13 @@ function exitGame(session, gameId, playerId) {
 // =================
 
 function initPlayer() {
+
+  const player = playerController.createPlayer();
+  logger.info(`Initialized player ${player.id}`);
+
   return {
-    games: gameController.getJoinableGames(),
-    player: playerController.createPlayer()
+    player,
+    games: gameController.getJoinableGames()
   };
 }
 

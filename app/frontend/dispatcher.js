@@ -89,8 +89,9 @@ function onGameRemoved(gameId) {
 // PLAYER MANAGEMENT
 // =================
 
-function handleInitPlayerResult(session, player, games) {
+function onInitPlayer(session, player, games) {
   currentPlayer = player;
+  console.log(`Player ID is ${player.id}`);
 
   viewManager.initEventManager(
     () => createGame(session),
@@ -121,7 +122,7 @@ connection.onopen = function(session) {
   console.log('Connection to WAMP router established');
 
   session.call('ch.comem.archioweb.tictactoe.initPlayer', []).then(result => {
-    handleInitPlayerResult(session, result.player, result.games);
+    onInitPlayer(session, result.player, result.games);
   }).catch(onError);
 
   session.subscribe('ch.comem.archioweb.tictactoe.games.added', (args, params) => onGameAdded(session, params.game));
