@@ -2,12 +2,14 @@
 const WebSocket = require('ws');
 
 const GameManager = require('../class/game-manager.class');
+const { createLogger } = require('./config');
 const GameController = require('./controller/game.controller');
 const PlayerController = require('./controller/player.controller');
 
 const gameManager = new GameManager();
-const playerController = new PlayerController(gameManager);
 const gameController = new GameController(gameManager);
+const logger = createLogger('dispatcher');
+const playerController = new PlayerController(gameManager);
 
 const playersWS = {};
 
@@ -137,48 +139,46 @@ const gameDispatcher = (command, params, actualPlayer) => {
 // COMMUNICATIONS
 // ==============
 
-const WS_PORT = parseInt(process.env.PORT, 10) + 1 || 8081;
+exports.createDispatcher = function(server) {
 
-const wss = new WebSocket.Server({
-  port: WS_PORT,
-  perMessageDeflate: false
-});
+  const wss = new WebSocket.Server({
+    server: server,
+    perMessageDeflate: false
+  });
 
-console.log(`=== LISTENING ON ${WS_PORT} ===`);
+  wss.on('connection', ws => {
+    logger.info('New WS client connection');
 
-wss.on('connection', ws => {
+    // Create a player for each newly connected client.
+    const newPlayer = playerController.createPlayer();
 
-  // --- New player management
+    playersWS[newPlayer.id] = ws;
 
-  const newPlayer = playerController.createPlayer();
-
-  playersWS[newPlayer.id] = ws;
-
-  ws.send(JSON.stringify({
-    resource: 'player',
-    command: 'receiveMyPlayer',
-    params: [ newPlayer ]
-  }));
-
-  gameController.getJoinableGames().forEach(game => {
     ws.send(JSON.stringify({
-      resource: 'game',
-      command: 'newJoinableGame',
-      params: [ game ]
+      resource: 'player',
+      command: 'receiveMyPlayer',
+      params: [ newPlayer ]
     }));
-  });
 
-  // --- New player message management
-  console.log('=== NEW WS CONNECTION ===');
-  ws.on('message', msg => {
-    console.log('=== NEW MESSAGE ===');
-    const msgData = JSON.parse(msg);
-    console.log(msgData);
+    gameController.getJoinableGames().forEach(game => {
+      ws.send(JSON.stringify({
+        resource: 'game',
+        command: 'newJoinableGame',
+        params: [ game ]
+      }));
+    });
 
-    switch (msgData.resource) {
-      case 'game':
-        gameDispatcher(msgData.command, msgData.params, newPlayer);
-        break;
-    }
+    // Dispatch messages from clients.
+    ws.on('message', msg => {
+
+      logger.debug(`New client message: ${msg}`);
+      const msgData = JSON.parse(msg);
+
+      switch (msgData.resource) {
+        case 'game':
+          gameDispatcher(msgData.command, msgData.params, newPlayer);
+          break;
+      }
+    });
   });
-});
+};

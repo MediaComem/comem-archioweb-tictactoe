@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const ViewManager = require('./view-manager');
 
 let currentGame;
@@ -133,7 +134,7 @@ const dispatchPlayerCommand = (command, params) => {
 // COMMUNICATIONS
 // ==============
 
-const WS_URL = `ws://${window.location.hostname}:${parseInt(window.location.port, 10) + 1}`;
+const WS_URL = `ws://${window.location.hostname}:${window.location.port}`;
 const ws = new WebSocket(WS_URL);
 
 // ----------------------------------- WEBSOCKET MANAGEMENT
