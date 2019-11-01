@@ -6,22 +6,28 @@ let currentPlayer;
 
 const viewManager = new ViewManager();
 
+function onError(message) {
+  viewManager.displayToast(message);
+}
+
 // GAME MANAGEMENT
 // ===============
 
-const createNewGame = ws => {
+function createGame(ws) {
   if (!currentPlayer) {
     return viewManager.displayToast('No player information available');
   }
 
   ws.send(JSON.stringify({
     resource: 'game',
-    command: 'createNewGame',
-    params: [ currentPlayer.id ]
+    command: 'createGame',
+    params: {
+      playerId: currentPlayer.id
+    }
   }));
-};
+}
 
-const exitGameRequest = ws => {
+function exitGame(ws) {
   if (!currentGame || !currentPlayer) {
     return;
   }
@@ -29,107 +35,103 @@ const exitGameRequest = ws => {
   ws.send(JSON.stringify({
     resource: 'game',
     command: 'exitGame',
-    params: [ currentGame.id, currentPlayer.id ]
+    params: {
+      gameId: currentGame.id,
+      playerId: currentPlayer.id
+    }
   }));
-};
+}
 
-const displayNewGame = (ws, game) => {
+function onStartGame(ws, game) {
   currentGame = game;
 
-  viewManager.displayNewGame(currentPlayer, game, (col, row) => {
+  viewManager.displayGame(currentPlayer, game, (col, row) => {
     ws.send(JSON.stringify({
       resource: 'game',
-      command: 'updateBoardRequest',
-      params: [ game.id, currentPlayer.id, col, row ]
+      command: 'play',
+      params: {
+        col,
+        row,
+        gameId: game.id,
+        playerId: currentPlayer.id
+      }
     }));
   });
-};
+}
 
-const updateBoard = (row, col, icon) => {
+function onUpdateGame(col, row, icon, status) {
   viewManager.updateBoard(col, row, icon);
-};
+  if (status === 'win') {
+    viewManager.displayToast(`${icon} wins!`);
+  } else if (status === 'draw') {
+    viewManager.displayToast('Draw!');
+  }
+}
 
-const addNewJoinableGame = (ws, game) => {
-  viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
-    ws.send(JSON.stringify({
-      resource: 'game',
-      command: 'requestJoinGame',
-      params: [ gameId, playerId ]
-    }));
+function onAddGames(ws, games) {
+  games.forEach(game => {
+    viewManager.addNewJoinableGame(currentPlayer, game, (gameId, playerId) => {
+      ws.send(JSON.stringify({
+        resource: 'game',
+        command: 'joinGame',
+        params: { gameId, playerId }
+      }));
+    });
   });
-};
+}
 
-const removeJoinableGame = gameId => {
-  viewManager.removeJoinableGame(gameId);
-};
-
-const exitGame = () => {
+function onExitGame(params) {
+  viewManager.displayToast(params.playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
   viewManager.exitGame();
-};
+}
 
-const dispatchGameCommand = (command, params, ws) => {
+function onRemoveGame(gameId) {
+  viewManager.removeGame(gameId);
+}
+
+function dispatchGameEvent(command, params, ws) {
   switch (command) {
-    case 'newJoinableGame':
-      const newJoinableGame = params[0];
-      addNewJoinableGame(ws, newJoinableGame);
+    case 'error':
+      onError(`Game error: ${params.message}`);
       break;
 
-    case 'displayNewGame':
-      const newGame = params[0];
-      displayNewGame(ws, newGame);
+    case 'addGames':
+      onAddGames(ws, params.games);
       break;
 
-    case 'updateBoard':
-      const row = params[0];
-      const col = params[1];
-      const icon = params[2];
-      updateBoard(row, col, icon);
+    case 'startGame':
+      onStartGame(ws, params.game);
       break;
 
-    case 'winMove':
-      const winIcon = params[1];
-      viewManager.displayToast(`${winIcon} win.`);
+    case 'updateGame':
+      onUpdateGame(params.col, params.row, params.icon, params.status);
       break;
 
-    case 'drawMove':
-      viewManager.displayToast('Draw !');
-      break;
-
-    case 'invalidMove':
-      viewManager.displayToast('Move invalid');
-      break;
-
-    case 'removeJoinableGame':
-      const gameToRemove = params[0];
-      removeJoinableGame(gameToRemove);
-      break;
-
-    case 'invalidGame':
+    case 'removeGame':
+      onRemoveGame(params.gameId);
       break;
 
     case 'exitGame':
-      const exitMsg = params[0];
-      viewManager.displayToast(exitMsg);
-      exitGame(ws);
+      onExitGame(params);
       break;
   }
-};
+}
 
 // PLAYER MANAGEMENT
 // =================
 
-const receiveMyPlayer = playerFromServer => {
-  currentPlayer = playerFromServer;
-};
+function onSetPlayer(player) {
+  currentPlayer = player;
+  console.log(`Player ID is ${currentPlayer.id}`);
+}
 
-const dispatchPlayerCommand = (command, params) => {
+function dispatchPlayerEvent(command, params) {
   switch (command) {
-    case 'receiveMyPlayer':
-      const playerFromServer = params[0];
-      receiveMyPlayer(playerFromServer);
+    case 'setPlayer':
+      onSetPlayer(params.player);
       break;
   }
-};
+}
 
 // COMMUNICATIONS
 // ==============
@@ -137,39 +139,36 @@ const dispatchPlayerCommand = (command, params) => {
 const WS_URL = `ws://${window.location.hostname}:${window.location.port}`;
 const ws = new WebSocket(WS_URL);
 
-// ----------------------------------- WEBSOCKET MANAGEMENT
 ws.onopen = () => {
-  console.log('=== CONNECTION OPEN WITH WEBSOCKET ===');
+  console.log(`Connected to WebSockets server at ${WS_URL}`);
 
-  // ----------------------------------- DOM EVENT MANAGEMENT
+  // Handle clicks on Create & Exit Game.
   viewManager.initEventManager(
-    () => createNewGame(ws),
-    () => exitGameRequest(ws)
+    () => createGame(ws),
+    () => exitGame(ws)
   );
 
   ws.onmessage = msg => {
-    console.log('=== NEW MESSAGE ===');
-    const msgData = JSON.parse(msg.data);
-    console.log(msgData);
-    /*
-            Message data structure :
-            {
-                'resource':'[RESOURCE_NAME]'.
-                'command':'[COMMAND_NAME]',
-                'params': [
-                    {'param1':'zzz'},
-                    ...
-                ]
-            }
-        */
 
+    console.log(`Received message from server: ${msg.data}`);
+    const msgData = JSON.parse(msg.data);
+
+    /**
+     * Message data structure :
+     * {
+     *   "resource": "[RESOURCE_NAME]"".
+     *   "command": "[COMMAND_NAME]"",
+     *   "params": [
+     *       ...
+     *   ]
+     *
+     */
     switch (msgData.resource) {
       case 'game':
-        dispatchGameCommand(msgData.command, msgData.params, ws);
+        dispatchGameEvent(msgData.command, msgData.params, ws);
         break;
-
       case 'player':
-        dispatchPlayerCommand(msgData.command, msgData.params, ws);
+        dispatchPlayerEvent(msgData.command, msgData.params, ws);
         break;
     }
   };
