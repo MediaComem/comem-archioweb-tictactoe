@@ -141,11 +141,13 @@ export function createFrontendDispatcher(viewManager) {
   // COMMUNICATIONS
   // ==============
 
-  const WS_URL = `ws://${window.location.hostname}:${window.location.port}`;
-  const ws = new WebSocket(WS_URL);
+  // Open a WebSocket connection to the backend.
+  const wsProtocol = window.location.protocol.startsWith('https') ? 'wss' : 'ws';
+  const wsUrl = `${wsProtocol}://${window.location.hostname}:${window.location.port}`;
+  const ws = new WebSocket(wsUrl);
 
-  ws.onopen = () => {
-    console.log(`Connected to WebSockets server at ${WS_URL}`);
+  ws.onopen = function() {
+    console.log(`Connected to WebSocket server at ${wsUrl}`);
 
     // Handle DOM events.
     viewManager.on('createGame', () => onCreateGameClicked(ws));
@@ -154,13 +156,13 @@ export function createFrontendDispatcher(viewManager) {
     viewManager.on('leaveGame', () => onLeaveGameClicked(ws));
 
     // Dispatch server messages.
-    ws.onmessage = msg => {
+    ws.onmessage = function(message) {
 
-      console.log(`Received message from server: ${msg.data}`);
-      const msgData = JSON.parse(msg.data);
+      console.log(`Received message from server: ${message.data}`);
+      const messageData = JSON.parse(message.data);
 
       /**
-       * Message format:
+       * Message data format:
        * {
        *   "resource": "<game|player>".
        *   "command": "<command>",
@@ -169,12 +171,12 @@ export function createFrontendDispatcher(viewManager) {
        *   }
        * }
        */
-      switch (msgData.resource) {
+      switch (messageData.resource) {
         case 'game':
-          dispatchGameCommand(msgData.command, msgData.params);
+          dispatchGameCommand(messageData.command, messageData.params);
           break;
         case 'player':
-          dispatchPlayerCommand(msgData.command, msgData.params);
+          dispatchPlayerCommand(messageData.command, messageData.params);
           break;
       }
     };

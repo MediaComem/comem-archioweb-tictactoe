@@ -25,10 +25,10 @@ exports.createBackendDispatcher = function(server) {
 
   const clients = {};
 
-  function sendMessageToPlayer(playerId, message) {
+  function sendMessageToPlayer(playerId, messageData) {
     const client = clients[playerId];
     if (client) {
-      client.send(JSON.stringify(message));
+      client.send(JSON.stringify(messageData));
     }
   }
 
@@ -193,18 +193,18 @@ exports.createBackendDispatcher = function(server) {
   // ==============
 
   const wss = new WebSocket.Server({
-    server,
-    perMessageDeflate: false
+    server
   });
 
-  wss.on('connection', ws => {
+  // Handle new client connections.
+  wss.on('connection', function(ws) {
     logger.info('New WebSocket client connected');
 
-    // Create a player for each newly connected client.
+    // Create a player for each newly connected frontend client.
     const newPlayer = playerController.createPlayer();
     logger.info(`Player ${newPlayer.id} created`);
 
-    // Store a mapping between the new player's ID and the WebSockets client.
+    // Map the new player's ID to the WebSocket client.
     clients[newPlayer.id] = ws;
 
     // Forget the mapping when the client disconnects.
@@ -234,14 +234,14 @@ exports.createBackendDispatcher = function(server) {
     });
 
     // Receive and dispatch messages from clients.
-    ws.on('message', msg => {
+    ws.on('message', function(message) {
 
-      logger.debug(`New client message: ${msg}`);
-      const msgData = JSON.parse(msg);
+      logger.debug(`New client message: ${message}`);
+      const messageData = JSON.parse(message);
 
-      switch (msgData.resource) {
+      switch (messageData.resource) {
         case 'game':
-          dispatchGameCommand(msgData.command, msgData.params, newPlayer);
+          dispatchGameCommand(messageData.command, messageData.params, newPlayer);
           break;
       }
     });
