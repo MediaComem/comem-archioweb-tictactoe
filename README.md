@@ -33,7 +33,8 @@ The purpose of this exercise is to implement real-time communication in a small
 web game, either with [WebSockets][ws] or the [Web Application Messaging
 Protocol (WAMP)][wamp].
 
-This repository contains a partially implemented [tic-tac-toe][tic-tac-toe]:
+This repository contains a partially implemented [tic-tac-toe][tictactoe] web
+application:
 
 * The `app/backend` directory contains an [Express.js][express] application that
   can register players and manage multiple games.
