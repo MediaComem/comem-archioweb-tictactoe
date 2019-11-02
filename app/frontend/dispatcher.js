@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable */
 /**
  * This file handles the frontend client's communications with the backend.
  * @module app/frontend/dispatcher
