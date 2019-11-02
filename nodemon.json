@@ -5,7 +5,7 @@
   ],
   "watch": [
     "app/backend",
-    "class"
+    "app/class"
   ],
   "ext": "js"
 }

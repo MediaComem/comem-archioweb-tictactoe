@@ -4,7 +4,7 @@ module.exports = {
   entry: './app/frontend/index.js',
   output: {
     filename: 'build.js',
-    path: path.resolve(__dirname, './public/js'),
+    path: path.resolve(__dirname, './public/js')
   },
   module: {
     rules: [
@@ -21,10 +21,10 @@ module.exports = {
           // Translates CSS into CommonJS
           'css-loader',
           // Compiles Sass to CSS
-          'sass-loader',
-        ],
-      },
-    ],
+          'sass-loader'
+        ]
+      }
+    ]
   },
   performance: {
     maxAssetSize: 1024 * 1024,

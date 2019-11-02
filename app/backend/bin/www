@@ -3,7 +3,7 @@ const http = require('http');
 
 const app = require('../app');
 const { createLogger, port } = require('../config');
-const { createDispatcher } = require('../dispatcher');
+const { createBackendDispatcher } = require('../dispatcher');
 
 const logger = createLogger('www');
 
@@ -11,7 +11,7 @@ app.set('port', port);
 
 const server = http.createServer(app);
 
-createDispatcher(server);
+createBackendDispatcher(server);
 
 server.listen(port);
 server.on('error', onError);
