@@ -6,6 +6,8 @@
   "scripts": {
     "backend:watch": "nodemon",
     "docker:build": "docker build -t tic-tac-toe-real-time .",
+    "docs:build": "jsdoc -d docs -r app",
+    "docs:watch": "onchange \"app/**/*.js\" -- npm run docs:build",
     "frontend:build": "webpack-cli --mode=\"production\"",
     "frontend:watch": "webpack-cli --watch --mode=\"development\"",
     "lint": "eslint app webpack.config.js",
@@ -38,6 +40,7 @@
     "css-loader": "^3.2.0",
     "eslint": "^6.6.0",
     "eslint-plugin-sort-requires-by-path": "^1.0.2",
+    "jsdoc": "^3.6.3",
     "node-sass": "^4.12.0",
     "nodemon": "^1.19.4",
     "onchange": "^6.1.0",
