@@ -1,4 +1,32 @@
-const GameError = require('../../class/game-error.class');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/controller/game.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/controller/game.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const GameError = require('../../class/game-error.class');
 const Game = require('../../class/game.class');
 
 /**
@@ -18,7 +46,7 @@ class GameController {
    * Creates and stores a new game started by the specified player.
    * @param {string} playerId - The player's ID.
    * @returns {Game} The newly created game.
-   * @throws {GameError} If the player is not found: error code <code>tictactoe.playerNotFound</code>.
+   * @throws {GameError} If the player is not found: error code &lt;code>tictactoe.playerNotFound&lt;/code>.
    */
   createNewGame(playerId) {
 
@@ -46,9 +74,9 @@ class GameController {
    * @param {string} gameId - The game's ID.
    * @param {string} playerId - The player's ID.
    * @returns {GameController~JoinGameResult} The game and player.
-   * @throws {GameError} If the game is not found: error code <code>tictactoe.gameNotFound</code>.
-   * @throws {GameError} If the player is not found: error code <code>tictactoe.playerNotFound</code>.
-   * @throws {GameError} If the game is full: error code <code>tictactoe.gameFull</code>.
+   * @throws {GameError} If the game is not found: error code &lt;code>tictactoe.gameNotFound&lt;/code>.
+   * @throws {GameError} If the player is not found: error code &lt;code>tictactoe.playerNotFound&lt;/code>.
+   * @throws {GameError} If the game is full: error code &lt;code>tictactoe.gameFull&lt;/code>.
    */
   joinGame(gameId, playerId) {
 
@@ -77,8 +105,8 @@ class GameController {
    * @param {number} col - The column's index of the cell in which to play.
    * @param {number} row - The row's index of the cell in which to play.
    * @returns {GameController~PlayResult} An object representing the state of the game after the move is played.
-   * @throws {GameError} If the game is not found: error code <code>tictactoe.gameNotFound</code>.
-   * @throws {GameError} If the move is invalid or the player is not in the game: error code <code>tictactoe.invalidMove</code>.
+   * @throws {GameError} If the game is not found: error code &lt;code>tictactoe.gameNotFound&lt;/code>.
+   * @throws {GameError} If the move is invalid or the player is not in the game: error code &lt;code>tictactoe.invalidMove&lt;/code>.
    */
   play(gameId, playerId, col, row) {
 
@@ -110,8 +138,8 @@ class GameController {
    * @param {string} gameId - The game's ID.
    * @param {string} playerId - The player's ID.
    * @returns {GameController~LeaveGameResult} The game and player.
-   * @throws {GameError} If the game is not found: error code <code>tictactoe.gameNotFound</code>.
-   * @throws {GameError} If the player is not in the game: error code <code>tictactoe.playerNotInGame</code>.
+   * @throws {GameError} If the game is not found: error code &lt;code>tictactoe.gameNotFound&lt;/code>.
+   * @throws {GameError} If the player is not in the game: error code &lt;code>tictactoe.playerNotInGame&lt;/code>.
    */
   leaveGame(gameId, playerId) {
 
@@ -154,7 +182,30 @@ class GameController {
  * @property {Game} game - The game in which the move was made.
  * @property {boolean} win - Whether the game is a win.
  * @property {boolean} draw - Whether the game is a draw.
- * @property {string} icon - The icon (<code>X</code> or <code>O</code>) of the player who made the move.
+ * @property {string} icon - The icon (&lt;code>X&lt;/code> or &lt;code>O&lt;/code>) of the player who made the move.
  */
 
 module.exports = GameController;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app_backend_config.html">app/backend/config</a></li><li><a href="module-app_backend_dispatcher.html">app/backend/dispatcher</a></li><li><a href="module-app_frontend_dispatcher.html">app/frontend/dispatcher</a></li></ul><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li><li><a href="GameController.html">GameController</a></li><li><a href="GameError.html">GameError</a></li><li><a href="GameManager.html">GameManager</a></li><li><a href="Player.html">Player</a></li><li><a href="PlayerController.html">PlayerController</a></li><li><a href="ViewManager.html">ViewManager</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Nov 02 2019 13:27:16 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

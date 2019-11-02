@@ -1,175 +1,182 @@
-/* eslint-disable no-unused-vars */
-const ViewManager = require('./view-manager');
+/**
+ * This file handles the frontend client's communications with the backend.
+ * @module app/frontend/dispatcher
+ */
 
-let currentGame;
-let currentPlayer;
+/**
+ * Creates the frontend's dispatcher.
+ * @param {ViewManager} viewManager - The frontend's view manager.
+ */
+export function createFrontendDispatcher(viewManager) {
 
-const viewManager = new ViewManager();
+  // SETUP
+  // =====
 
-function onError(message) {
-  viewManager.displayToast(message);
-}
+  let currentGame;
+  let currentPlayer;
 
-// GAME MANAGEMENT
-// ===============
-
-function createGame(ws) {
-  if (!currentPlayer) {
-    return viewManager.displayToast('No player information available');
+  function handleError(message) {
+    viewManager.displayToast(message);
   }
 
-  ws.send(JSON.stringify({
-    resource: 'game',
-    command: 'createGame',
-    params: {
-      playerId: currentPlayer.id
-    }
-  }));
-}
+  // GAME MANAGEMENT
+  // ===============
 
-function exitGame(ws) {
-  if (!currentGame || !currentPlayer) {
-    return;
+  function onCreateGameClicked(ws) {
+    if (!currentPlayer) {
+      return viewManager.displayToast('No player information available');
+    }
+
+    ws.send(JSON.stringify({
+      resource: 'game',
+      command: 'createGame',
+      params: {}
+    }));
   }
 
-  ws.send(JSON.stringify({
-    resource: 'game',
-    command: 'exitGame',
-    params: {
-      gameId: currentGame.id,
-      playerId: currentPlayer.id
-    }
-  }));
-}
+  function onJoinGameClicked(ws, gameId) {
+    ws.send(JSON.stringify({
+      resource: 'game',
+      command: 'joinGame',
+      params: {
+        gameId
+      }
+    }));
+  }
 
-function onStartGame(ws, game) {
-  currentGame = game;
-
-  viewManager.displayGame(currentPlayer, game, (col, row) => {
+  function onBoardClicked(ws, col, row) {
     ws.send(JSON.stringify({
       resource: 'game',
       command: 'play',
       params: {
         col,
         row,
-        gameId: game.id,
-        playerId: currentPlayer.id
+        gameId: currentGame.id
       }
     }));
-  });
-}
-
-function onUpdateGame(col, row, icon, status) {
-  viewManager.updateBoard(col, row, icon);
-  if (status === 'win') {
-    viewManager.displayToast(`${icon} wins!`);
-  } else if (status === 'draw') {
-    viewManager.displayToast('Draw!');
   }
-}
 
-function onAddGames(ws, games) {
-  games.forEach(game => {
-    viewManager.addGame(currentPlayer, game, (gameId, playerId) => {
-      ws.send(JSON.stringify({
-        resource: 'game',
-        command: 'joinGame',
-        params: { gameId, playerId }
-      }));
-    });
-  });
-}
+  function onLeaveGameClicked(ws) {
+    if (!currentGame || !currentPlayer) {
+      return;
+    }
 
-function onExitGame(params) {
-  viewManager.displayToast(params.playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
-  viewManager.exitGame();
-}
-
-function onRemoveGame(gameId) {
-  viewManager.removeGame(gameId);
-}
-
-function dispatchGameEvent(command, params, ws) {
-  switch (command) {
-    case 'error':
-      onError(`Game error: ${params.message}`);
-      break;
-
-    case 'addGames':
-      onAddGames(ws, params.games);
-      break;
-
-    case 'startGame':
-      onStartGame(ws, params.game);
-      break;
-
-    case 'updateGame':
-      onUpdateGame(params.col, params.row, params.icon, params.status);
-      break;
-
-    case 'removeGame':
-      onRemoveGame(params.gameId);
-      break;
-
-    case 'exitGame':
-      onExitGame(params);
-      break;
+    ws.send(JSON.stringify({
+      resource: 'game',
+      command: 'leaveGame',
+      params: {
+        gameId: currentGame.id
+      }
+    }));
   }
-}
 
-// PLAYER MANAGEMENT
-// =================
-
-function onSetPlayer(player) {
-  currentPlayer = player;
-  console.log(`Player ID is ${currentPlayer.id}`);
-}
-
-function dispatchPlayerEvent(command, params) {
-  switch (command) {
-    case 'setPlayer':
-      onSetPlayer(params.player);
-      break;
+  function handleStartGameCommand(game) {
+    currentGame = game;
+    viewManager.displayGame(game, currentPlayer);
   }
-}
 
-// COMMUNICATIONS
-// ==============
+  function handleUpdateGameCommand(col, row, icon, status) {
+    viewManager.updateBoard(col, row, icon);
+    if (status === 'win') {
+      viewManager.displayToast(`${icon} wins!`);
+    } else if (status === 'draw') {
+      viewManager.displayToast('Draw!');
+    }
+  }
 
-const WS_URL = `ws://${window.location.hostname}:${window.location.port}`;
-const ws = new WebSocket(WS_URL);
+  function handleAddJoinableGamesCommand(games) {
+    for (const game of games) {
+      viewManager.addJoinableGame(game);
+    }
+  }
 
-ws.onopen = () => {
-  console.log(`Connected to WebSockets server at ${WS_URL}`);
+  function handleLeaveGameCommand(params) {
+    viewManager.displayToast(params.playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
+    viewManager.leaveGame();
+  }
 
-  // Handle clicks on Create & Exit Game.
-  viewManager.initEventManager(
-    () => createGame(ws),
-    () => exitGame(ws)
-  );
+  function handleRemoveJoinableGameCommand(gameId) {
+    viewManager.removeJoinableGame(gameId);
+  }
 
-  ws.onmessage = msg => {
-
-    console.log(`Received message from server: ${msg.data}`);
-    const msgData = JSON.parse(msg.data);
-
-    /**
-     * Message data structure :
-     * {
-     *   "resource": "[RESOURCE_NAME]"".
-     *   "command": "[COMMAND_NAME]"",
-     *   "params": [
-     *       ...
-     *   ]
-     *
-     */
-    switch (msgData.resource) {
-      case 'game':
-        dispatchGameEvent(msgData.command, msgData.params, ws);
+  function dispatchGameCommand(command, params) {
+    switch (command) {
+      case 'error':
+        handleError(`Game error: ${params.message}`);
         break;
-      case 'player':
-        dispatchPlayerEvent(msgData.command, msgData.params, ws);
+      case 'addJoinableGames':
+        handleAddJoinableGamesCommand(params.games);
+        break;
+      case 'startGame':
+        handleStartGameCommand(params.game);
+        break;
+      case 'updateGame':
+        handleUpdateGameCommand(params.col, params.row, params.icon, params.status);
+        break;
+      case 'removeJoinableGame':
+        handleRemoveJoinableGameCommand(params.gameId);
+        break;
+      case 'leaveGame':
+        handleLeaveGameCommand(params);
         break;
     }
+  }
+
+  // PLAYER MANAGEMENT
+  // =================
+
+  function handleSetPlayerCommand(player) {
+    currentPlayer = player;
+    console.log(`Player ID is ${currentPlayer.id}`);
+  }
+
+  function dispatchPlayerCommand(command, params) {
+    switch (command) {
+      case 'setPlayer':
+        handleSetPlayerCommand(params.player);
+        break;
+    }
+  }
+
+  // COMMUNICATIONS
+  // ==============
+
+  const WS_URL = `ws://${window.location.hostname}:${window.location.port}`;
+  const ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    console.log(`Connected to WebSockets server at ${WS_URL}`);
+
+    // Handle DOM events.
+    viewManager.on('createGame', () => onCreateGameClicked(ws));
+    viewManager.on('joinGame', gameId => onJoinGameClicked(ws, gameId));
+    viewManager.on('play', (col, row) => onBoardClicked(ws, col, row));
+    viewManager.on('leaveGame', () => onLeaveGameClicked(ws));
+
+    // Dispatch server messages.
+    ws.onmessage = msg => {
+
+      console.log(`Received message from server: ${msg.data}`);
+      const msgData = JSON.parse(msg.data);
+
+      /**
+       * Message format:
+       * {
+       *   "resource": "<game|player>".
+       *   "command": "<command>",
+       *   "params": {
+       *       ...
+       *   }
+       * }
+       */
+      switch (msgData.resource) {
+        case 'game':
+          dispatchGameCommand(msgData.command, msgData.params);
+          break;
+        case 'player':
+          dispatchPlayerCommand(msgData.command, msgData.params);
+          break;
+      }
+    };
   };
-};
+}

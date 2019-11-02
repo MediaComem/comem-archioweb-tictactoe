@@ -1,4 +1,7 @@
-/* eslint-disable no-unused-vars */
+/**
+ * This file handles backend communication with frontend clients.
+ * @exports app/backend/dispatcher
+ */
 const WebSocket = require('ws');
 
 const GameManager = require('../class/game-manager.class');
@@ -6,197 +9,229 @@ const { createLogger } = require('./config');
 const GameController = require('./controller/game.controller');
 const PlayerController = require('./controller/player.controller');
 
-const gameManager = new GameManager();
-const gameController = new GameController(gameManager);
-const logger = createLogger('dispatcher');
-const playerController = new PlayerController(gameManager);
+/**
+ * Creates the backend's dispatcher.
+ * @param {HttpServer} server - The application's {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server|Node.js HTTP server}.
+ */
+exports.createBackendDispatcher = function(server) {
 
-const clients = {};
+  // SETUP
+  // =====
 
-// GAME MANAGEMENT
-// ===============
+  const gameManager = new GameManager();
+  const gameController = new GameController(gameManager);
+  const logger = createLogger('dispatcher');
+  const playerController = new PlayerController(gameManager);
 
-const gameDispatcher = (command, params, actualPlayer) => {
-  switch (command) {
-    case 'createGame':
-      const newGame = gameController.createNewGame(params.playerId);
-      logger.info(`Player ${params.playerId} created game ${newGame.id}`);
+  const clients = {};
 
-      gameManager.players.forEach(player => {
-        if (player.id !== actualPlayer.id) {
-          clients[player.id].send(
-            JSON.stringify({
-              resource: 'game',
-              command: 'addGames',
-              params: {
-                games: [ newGame ]
-              }
-            })
-          );
-        }
-      });
-
-      clients[actualPlayer.id].send(JSON.stringify({
-        resource: 'game',
-        command: 'startGame',
-        params: {
-          game: newGame
-        }
-      }));
-
-      break;
-
-    case 'play':
-      const boardRequestResult = gameController.play(params.gameId, params.playerId, params.col, params.row);
-      if (boardRequestResult === 'invalidGame') {
-        return clients[actualPlayer.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'error',
-          params: {
-            message: 'no such game'
-          }
-        }));
-      } else if (boardRequestResult === 'invalidMove') {
-        return clients[actualPlayer.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'error',
-          params: {
-            message: 'invalid move'
-          }
-        }));
-      }
-
-      logger.info(`Player ${params.playerId} played ${params.col},${params.row} in game ${params.gameId}`);
-
-      let status;
-      if (boardRequestResult.hasWin) {
-        status = 'win';
-      } else if (boardRequestResult.draw) {
-        status = 'draw';
-      }
-
-      if (status) {
-        logger.info(`Game ${params.gameId} is a ${status}`);
-      }
-
-      boardRequestResult.players.forEach(player => {
-        const playerWS = clients[player.id];
-
-        playerWS.send(JSON.stringify({
-          resource: 'game',
-          command: 'updateGame',
-          params: {
-            col: params.col,
-            row: params.row,
-            icon: boardRequestResult.playerIcon,
-            status: status
-          }
-        }));
-      });
-      break;
-
-    case 'joinGame':
-      const joinGameResult = gameController.joinGame(params.gameId, params.playerId);
-
-      if (joinGameResult === 'invalidGame') {
-        clients[actualPlayer.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'error',
-          params: {
-            message: 'no such game'
-          }
-        }));
-        return;
-      }
-
-      logger.info(`Player ${params.playerId} joined game ${params.gameId}`);
-
-      clients[actualPlayer.id].send(JSON.stringify({
-        resource: 'game',
-        command: 'startGame',
-        params: {
-          game: joinGameResult.game
-        }
-      }));
-
-      gameManager.players.forEach(player => {
-        clients[player.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'removeGame',
-          params: {
-            gameId: joinGameResult.game.id
-          }
-        }));
-      });
-
-      break;
-
-    case 'exitGame':
-      const exitGameResult = gameController.exitGame(params.gameId, params.playerId);
-
-      logger.info(`Player ${params.playerId} exited game ${params.gameId}`);
-
-      exitGameResult.game.players.forEach(player => {
-        clients[player.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'exitGame',
-          params: {
-            playerId: params.playerId
-          }
-        }));
-      });
-
-      gameManager.players.forEach(player => {
-        clients[player.id].send(JSON.stringify({
-          resource: 'game',
-          command: 'removeGame',
-          params: {
-            gameId: exitGameResult.game.id
-          }
-        }));
-      });
-
-      break;
+  function sendMessageToPlayer(playerId, message) {
+    const client = clients[playerId];
+    if (client) {
+      client.send(JSON.stringify(message));
+    }
   }
-};
 
-// COMMUNICATIONS
-// ==============
+  function handleError(playerId, err) {
+    sendMessageToPlayer(playerId, {
+      resource: 'game',
+      command: 'error',
+      params: {
+        code: err.code,
+        message: err.message
+      }
+    });
+  }
 
-exports.createDispatcher = function(server) {
+  // GAME MANAGEMENT
+  // ===============
+
+  function handleCreateGameCommand(playerId) {
+    let newGame;
+
+    try {
+      newGame = gameController.createNewGame(playerId);
+      logger.info(`Player ${playerId} created game ${newGame.id}`);
+    } catch (err) {
+      return handleError(playerId, err);
+    }
+
+    for (const player of gameManager.players) {
+      if (player.id !== playerId) {
+        sendMessageToPlayer(player.id, {
+          resource: 'game',
+          command: 'addJoinableGames',
+          params: {
+            games: [ newGame ]
+          }
+        });
+      }
+    }
+
+    sendMessageToPlayer(playerId, {
+      resource: 'game',
+      command: 'startGame',
+      params: {
+        game: newGame
+      }
+    });
+  }
+
+  function handleJoinGameCommand(gameId, playerId) {
+    let result;
+
+    try {
+      result = gameController.joinGame(gameId, playerId);
+      logger.info(`Player ${playerId} joined game ${gameId}`);
+    } catch (err) {
+      return handleError(playerId, err);
+    }
+
+    sendMessageToPlayer(playerId, {
+      resource: 'game',
+      command: 'startGame',
+      params: {
+        game: result.game
+      }
+    });
+
+    for (const player of gameManager.players) {
+      sendMessageToPlayer(player.id, {
+        resource: 'game',
+        command: 'removeJoinableGame',
+        params: {
+          gameId: result.game.id
+        }
+      });
+    }
+  }
+
+  function handlePlayCommand(gameId, playerId, col, row) {
+    let result;
+
+    try {
+      result = gameController.play(gameId, playerId, col, row);
+      logger.info(`Player ${playerId} played ${col},${row} in game ${gameId}`);
+    } catch (err) {
+      return handleError(playerId, err);
+    }
+
+    let status;
+    if (result.win) {
+      status = 'win';
+    } else if (result.draw) {
+      status = 'draw';
+    }
+
+    if (status) {
+      logger.info(`Game ${gameId} is a ${status}`);
+    }
+
+    for (const player of result.game.players) {
+      sendMessageToPlayer(player.id, {
+        resource: 'game',
+        command: 'updateGame',
+        params: {
+          col,
+          row,
+          status,
+          icon: result.icon
+        }
+      });
+    }
+  }
+
+  function handleLeaveGameCommand(gameId, playerId) {
+    let result;
+
+    try {
+      result = gameController.leaveGame(gameId, playerId);
+      logger.info(`Player ${playerId} exited game ${gameId}`);
+    } catch (err) {
+      return handleError(playerId, err);
+    }
+
+    for (const player of result.game.players) {
+      sendMessageToPlayer(player.id, {
+        resource: 'game',
+        command: 'leaveGame',
+        params: {
+          playerId: playerId
+        }
+      });
+    }
+
+    for (const player of gameManager.players) {
+      sendMessageToPlayer(player.id, {
+        resource: 'game',
+        command: 'removeJoinableGame',
+        params: {
+          gameId: result.game.id
+        }
+      });
+    }
+  }
+
+  function dispatchGameCommand(command, params, currentPlayer) {
+    switch (command) {
+      case 'createGame':
+        handleCreateGameCommand(currentPlayer.id);
+        break;
+      case 'play':
+        handlePlayCommand(params.gameId, currentPlayer.id, params.col, params.row);
+        break;
+      case 'joinGame':
+        handleJoinGameCommand(params.gameId, currentPlayer.id);
+        break;
+      case 'leaveGame':
+        handleLeaveGameCommand(params.gameId, currentPlayer.id);
+        break;
+    }
+  }
+
+  // COMMUNICATIONS
+  // ==============
 
   const wss = new WebSocket.Server({
-    server: server,
+    server,
     perMessageDeflate: false
   });
 
   wss.on('connection', ws => {
-    logger.info('New WS client connection');
+    logger.info('New WebSocket client connected');
 
     // Create a player for each newly connected client.
     const newPlayer = playerController.createPlayer();
+    logger.info(`Player ${newPlayer.id} created`);
 
     // Store a mapping between the new player's ID and the WebSockets client.
     clients[newPlayer.id] = ws;
 
+    // Forget the mapping when the client disconnects.
+    ws.on('close', () => {
+      logger.info(`Player ${newPlayer.id} disconnected`);
+      gameManager.removePlayer(newPlayer.id);
+      delete clients[newPlayer.id];
+    });
+
     // Send the player to the client.
-    ws.send(JSON.stringify({
+    sendMessageToPlayer(newPlayer.id, {
       resource: 'player',
       command: 'setPlayer',
       params: {
         player: newPlayer
       }
-    }));
+    });
 
     // Send currently joinable games to the client.
     const currentGames = gameController.getJoinableGames();
-    ws.send(JSON.stringify({
+    sendMessageToPlayer(newPlayer.id, {
       resource: 'game',
-      command: 'addGames',
+      command: 'addJoinableGames',
       params: {
         games: currentGames
       }
-    }));
+    });
 
     // Receive and dispatch messages from clients.
     ws.on('message', msg => {
@@ -206,9 +241,15 @@ exports.createDispatcher = function(server) {
 
       switch (msgData.resource) {
         case 'game':
-          gameDispatcher(msgData.command, msgData.params, newPlayer);
+          dispatchGameCommand(msgData.command, msgData.params, newPlayer);
           break;
       }
     });
   });
 };
+
+/**
+ * A {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server|Node.js HTTP server}.
+ * @typedef HttpServer
+ * @see {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server}
+ */

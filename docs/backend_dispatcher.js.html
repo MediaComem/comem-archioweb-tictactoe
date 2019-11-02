@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/dispatcher.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/dispatcher.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable no-unused-vars */
+/**
+ * This file handles backend communication with frontend clients.
+ * @exports app/backend/dispatcher
+ */
+const GameManager = require('../class/game-manager.class');
+const { createLogger } = require('./config');
+const GameController = require('./controller/game.controller');
+const PlayerController = require('./controller/player.controller');
+
+/**
+ * Creates the backend's dispatcher.
+ * @param {HttpServer} server - The application's {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server|Node.js HTTP server}.
+ */
+exports.createBackendDispatcher = function(server) {
+
+  // SETUP
+  // =====
+
+  const gameManager = new GameManager();
+  const gameController = new GameController(gameManager);
+  const logger = createLogger('dispatcher');
+  const playerController = new PlayerController(gameManager);
+
+  // TODO: declare variables and generic functions if you need them
+
+  /**
+   * Example: declare state
+   *
+   *     const clients = {};
+   */
+
+  /**
+   * Example: log a message
+   *
+   *     logger.debug('Detailed debug message');
+   *     logger.info('Informational message');
+   *     logger.warn('Warning message');
+   *     logger.error('Error message');
+   */
+
+  // GAME MANAGEMENT
+  // ===============
+
+  // TODO: write game management functions if you need them
+
+  /**
+   * Example: create a new game
+   *
+   *     try {
+   *       const newGame = gameController.createNewGame(playerId);
+   *       // The game has been created.
+   *     } catch (err) {
+   *       switch (err.code) {
+   *         case 'tictactoe.playerNotFound':
+   *           // The player does not exist.
+   *           break;
+   *         default:
+   *           // An unexpected error occurred.
+   *       }
+   *     }
+   */
+
+  /**
+   * Example: do something for all players
+   *
+   *     gameManager.players.forEach(player => {
+   *       // Do something with player...
+   *     });
+   */
+
+  /**
+   * Example: do something for a specific game's players
+   *
+   *     game.players.forEach(player => {
+   *       // Do something with player...
+   *     });
+   */
+
+  /**
+   * Example: make a player play a move in a game
+   *
+   *     try {
+   *       const result = gameController.play(gameId, playerId, col, row)
+   *       if (result.win) {
+   *         // The game has been won.
+   *       } else if (result.draw) {
+   *         // The game is a draw.
+   *       } else {
+   *         // The game continues.
+   *       }
+   *     } catch (err) {
+   *       switch (err.code) {
+   *         case 'tictactoe.gameNotFound':
+   *           // The game does not exist.
+   *           break;
+   *         case 'tictactoe.invalidMove':
+   *           // The player cannot make that move.
+   *           break;
+   *         default:
+   *           // An unexpected error occurred.
+   *       }
+   *     }
+   */
+
+  /**
+   * Example: make a player join a game
+   *
+   *     try {
+   *       const result = gameController.joinGame(gameId, playerId);
+   *       // The player has successfully joined the game.
+   *     } catch (err) {
+   *       switch (err.code) {
+   *         case 'tictactoe.gameNotFound':
+   *           // The game does not exist.
+   *           break;
+   *         case 'tictactoe.playerNotFound':
+   *           // The player does not exist.
+   *           break;
+   *         case 'tictactoe.gameFull':
+   *           // The game is full.
+   *           break;
+   *         default:
+   *           // An unexpected error occurred.
+   *       }
+   *     }
+   */
+
+  /**
+   * Example: make a player leave a game
+   *
+   *     try {
+   *       const result = gameController.leaveGame(gameId, playerId);
+   *       // The player has left the game.
+   *     } catch(err) {
+   *       switch (err.code) {
+   *         case 'tictactoe.gameNotFound':
+   *           // The game does not exist.
+   *           break;
+   *         case 'tictactoe.playerNotInGame':
+   *           // The player is not in that game.
+   *           break;
+   *         default:
+   *           // An unexpected error occurred.
+   *       }
+   *     }
+   */
+
+  // PLAYER MANAGEMENT
+  // =================
+
+  // TODO: write game management functions if you need them
+
+  // COMMUNICATIONS
+  // ==============
+
+  // TODO: implement the backend's communications with WebSockets or the Web Application Messaging Protocol (WAMP).
+};
+
+/**
+ * A {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server|Node.js HTTP server}.
+ * @typedef HttpServer
+ * @see {@link https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_server}
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app_backend_config.html">app/backend/config</a></li><li><a href="module-app_backend_dispatcher.html">app/backend/dispatcher</a></li><li><a href="module-app_frontend_dispatcher.html">app/frontend/dispatcher</a></li></ul><h3>Classes</h3><ul><li><a href="Game.html">Game</a></li><li><a href="GameController.html">GameController</a></li><li><a href="GameError.html">GameError</a></li><li><a href="GameManager.html">GameManager</a></li><li><a href="Player.html">Player</a></li><li><a href="PlayerController.html">PlayerController</a></li><li><a href="ViewManager.html">ViewManager</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Nov 02 2019 13:27:16 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

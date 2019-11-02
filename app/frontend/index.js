@@ -1,8 +1,11 @@
 import './sass/main.scss';
 
-const $ = require('jquery');
-require('bootstrap/dist/js/bootstrap');
+// Include Bootstrap's JavaScript components.
+import 'bootstrap/dist/js/bootstrap';
 
-$(() => {
-  require('./dispatcher');
-});
+import $ from 'jquery';
+
+import ViewManager from './view-manager';
+import { createFrontendDispatcher } from './dispatcher';
+
+$(() => createFrontendDispatcher(new ViewManager()));
