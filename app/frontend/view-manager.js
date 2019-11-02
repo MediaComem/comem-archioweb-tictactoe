@@ -38,10 +38,10 @@ class ViewManager {
    * Registers an event handler.
    *
    * <ul>
-   *   <li><code>createGame()</code> - The user clicked the Create Game button.</li>
-   *   <li><code>joinGame(gameId)</code> - The user clicked one of the displayed games' Join Game button.</li>
-   *   <li><code>play(col, row)</code> - The user clicked one of the board's cells in the current game.</li>
-   *   <li><code>leaveGame()</code> - The user clicked the Leave Game button.</li>
+   *   <li><code>on('createGame', function() {})</code> - The user clicked the Create Game button.</li>
+   *   <li><code>on('joinGame', function(gameId) {})</code> - The user clicked one of the displayed games' Join Game button.</li>
+   *   <li><code>on('play', function(col, row) {})</code> - The user clicked one of the board's cells in the current game.</li>
+   *   <li><code>on('leaveGame', function() {})</code> - The user clicked the Leave Game button.</li>
    * </ul>
    * @param {string} eventName - The event name.
    * @param {Function} handler - A function to call when the event occurs.
