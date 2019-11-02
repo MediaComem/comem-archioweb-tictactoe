@@ -35,6 +35,22 @@ class ViewManager {
   }
 
   /**
+   * Registers an event handler.
+   *
+   * <ul>
+   *   <li><code>createGame()</code> - The user clicked the Create Game button.</li>
+   *   <li><code>joinGame(gameId)</code> - The user clicked one of the displayed games' Join Game button.</li>
+   *   <li><code>play(col, row)</code> - The user clicked one of the board's cells in the current game.</li>
+   *   <li><code>leaveGame()</code> - The user clicked the Leave Game button.</li>
+   * </ul>
+   * @param {string} eventName - The event name.
+   * @param {Function} handler - A function to call when the event occurs.
+   */
+  on(eventName, handler) {
+    this.events.on(eventName, (event, ...args) => handler(...args));
+  }
+
+  /**
    * Displays a toast message visible to the end user.
    * @param {string} message - The message to display.
    */
@@ -60,7 +76,7 @@ class ViewManager {
         const boardBtn = this.TMP_BOARD_BTN.clone();
 
         boardBtn.addClass('EMPTY');
-        boardBtn.on('click', () => this.events.emit('play', colIndex, rowIndex));
+        boardBtn.on('click', () => this.events.trigger('play', [ colIndex, rowIndex ]));
 
         this.BOARD_GRID.append(boardBtn);
       });
@@ -104,7 +120,7 @@ class ViewManager {
     $('.playerid', joinableGame).text('');
     $('.playername', joinableGame).text(`Game by player ${game.players[0].id}`);
 
-    $('.join-btn', joinableGame).on('click', () => this.events.emit('joinGame', game.id));
+    $('.join-btn', joinableGame).on('click', () => this.events.trigger('joinGame', [ game.id ]));
 
     $('.games', this.SHOWGAME_CONTAINER).append(joinableGame);
   }
@@ -149,8 +165,8 @@ class ViewManager {
       });
     });
 
-    this.BTN_CREATE_NEWGAME.click(() => this.events.emit('createGame'));
-    this.BTN_LEAVE_GAME.click(() => this.events.emit('leaveGame'));
+    this.BTN_CREATE_NEWGAME.click(() => this.events.trigger('createGame'));
+    this.BTN_LEAVE_GAME.click(() => this.events.trigger('leaveGame'));
   }
 }
 
