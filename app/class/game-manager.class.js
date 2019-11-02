@@ -54,6 +54,17 @@ class GameManager {
   findPlayerById(playerId) {
     return this.players.find(player => player.id === playerId);
   }
+
+  /**
+   * Removes the specified player from the list of registered players.
+   * @param {string} playerId The player's ID.
+   */
+  removePlayer(playerId) {
+    const playerIndex = this.players.findIndex(player => player.id === playerId);
+    if (playerIndex >= 0) {
+      this.players.splice(0, 1);
+    }
+  }
 }
 
 module.exports = GameManager;

@@ -84,9 +84,9 @@ class GameController {
 
     const game = this.gameManager.findGameById(gameId);
     if (!game) {
-      throw new Error('tictactoe.gameNotFound', `Game ${gameId} not found`);
+      throw new GameError('tictactoe.gameNotFound', `Game ${gameId} not found`);
     } else if (!game.play(col, row, playerId)) {
-      throw new Error('tictactoe.invalidMove', 'Invalid move');
+      throw new GameError('tictactoe.invalidMove', 'Invalid move');
     }
 
     const icon = game.getPlayerIcon(playerId);
@@ -117,12 +117,12 @@ class GameController {
 
     const game = this.gameManager.findGameById(gameId);
     if (!game) {
-      throw new Error('tictactoe.gameNotFound', `Game ${gameId} not found`);
+      throw new GameError('tictactoe.gameNotFound', `Game ${gameId} not found`);
     }
 
     const player = game.getPlayer(playerId);
     if (!player) {
-      throw new Error('tictactoe.playerNotInGame', `Player ${playerId} is not in game ${gameId}`);
+      throw new GameError('tictactoe.playerNotInGame', `Player ${playerId} is not in game ${gameId}`);
     }
 
     game.state = Game.STATE.CLOSED;

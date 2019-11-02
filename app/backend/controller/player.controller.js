@@ -19,7 +19,8 @@ class PlayerController {
    */
   createPlayer() {
 
-    const newPlayer = new Player(this.gameManager.players.length + 1);
+    const players = this.gameManager.players;
+    const newPlayer = new Player(players.length === 0 ? 1 : players[players.length - 1].id + 1);
     this.gameManager.addPlayer(newPlayer);
 
     return newPlayer;
