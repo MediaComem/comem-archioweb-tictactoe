@@ -1,13 +1,12 @@
 FROM node:12.13.0-alpine
 
-LABEL name="tic-tac-toe-websocket" \
-      version="0.1" \
-      description="A container for a Tic-Tac-Toe in websocket"
+LABEL name="comem-archioweb-tic-tac-toe" \
+      version="1.0.0" \
+      description="A container for a real-time Tic-Tac-Toe application"
 
 WORKDIR /usr/src/app
 
-ENV SERVER_PORT=8080 \
-    WEBSOCKET_PORT=8081
+ENV PORT=3000
 
 COPY package.json package-lock.json /usr/src/app/
 
@@ -15,13 +14,13 @@ RUN apk --no-cache add \
       make \
       python \
     && \
-    npm install
+    npm ci
 
 COPY . /usr/src/app/
 
 RUN npm run lint && \
-    npm run front-build
+    npm run frontend:build
 
-EXPOSE $SERVER_PORT $WEBSOCKET_PORT
+EXPOSE $PORT
 
 CMD [ "npm", "start" ]
