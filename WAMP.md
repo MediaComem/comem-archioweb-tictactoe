@@ -12,8 +12,18 @@ backend and frontend.
 
 ## Tips
 
-* Open browser developer console
-* Reload the browser page after each step, check backend & frontend logs
+* **Keep your browser's developer console open** throughout this exercise to see
+  messages and errors logged by the frontend client.
+* Each step introduces a small bit of functionality which can usually be tested
+  after refreshing your browser. Keep an eye on your browser's developer console
+  and on the terminal where your are running the backend. Various **messages
+  will be logged** to indicate what is happening.
+* **Edit the correct file:** when a step is titled `Backend: ...`, it means that
+  you must edit the `app/backend/dispatcher.js` file. Conversely, when a step is
+  titled `Frontend: ...`, you must edit the `app/frontend/dispatcher.js` file.
+* The mention `// <PREVIOUS CODE HERE...>` indicates that you should add new
+  code underneath the code you previously added in a given section. Unless
+  specified otherwise, you should never have to delete code.
 
 
 
@@ -174,7 +184,7 @@ viewManager.on('createGame', () => onCreateGameClicked(session));
 // GAME MANAGEMENT
 // ===============
 
-// <previous code here...>
+// <PREVIOUS CODE HERE...>
 
 function onCreateGameClicked(session) {
   if (!currentPlayer) {
@@ -191,7 +201,7 @@ function onCreateGameClicked(session) {
 // SETUP
 // =====
 
-// <previous code here...>
+// <PREVIOUS CODE HERE...>
 
 let currentGame;
 ```
@@ -200,7 +210,7 @@ let currentGame;
 // GAME MANAGEMENT
 // ===============
 
-// <previous code here...>
+// <PREVIOUS CODE HERE...>
 
 function startGame(session, game, player) {
   currentGame = game;
@@ -228,7 +238,7 @@ session.subscribe('ch.comem.archioweb.tictactoe.joinableGames.added', (args, par
 // GAME MANAGEMENT
 // ===============
 
-// <previous code here...>
+// <PREVIOUS CODE HERE...>
 
 function onJoinableGameAdded(game) {
   viewManager.addJoinableGame(game);
@@ -247,7 +257,7 @@ session.register('ch.comem.archioweb.tictactoe.joinGame', (args, params) => join
 // GAME MANAGEMENT
 // ===============
 
-// <previous code here...>
+// <PREVIOUS CODE HERE...>
 
 function joinGame(session, gameId, playerId) {
   let result;
