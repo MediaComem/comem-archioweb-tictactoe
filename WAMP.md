@@ -777,16 +777,6 @@ actions have been performed.
 
 
 
-TOLINK: game-controller
-TOLINK: game-controller-create-new-game
-TOLINK: game-controller-join-game
-TOLINK: game-error
-TOLINK: player-controller-create-player
-TOLINK: view-manager-add-joinable-game
-TOLINK: view-manager-display-game
-TOLINK: view-manager-on
-TOLINK: view-manager-remove-joinable-game
-
 [autobahn]: https://github.com/crossbario/autobahn-js
 [autobahn-call]: https://github.com/crossbario/autobahn-js/blob/master/doc/reference.md#call
 [autobahn-connections]: https://github.com/crossbario/autobahn-js/blob/master/doc/reference.md#connections
@@ -796,6 +786,15 @@ TOLINK: view-manager-remove-joinable-game
 [crossbar-auth-ticket]: https://crossbar.io/docs/Ticket-Authentication/
 [crossbar-docker]: https://crossbar.io/docs/Getting-Started/#starting-a-crossbar-io-router
 [dotenv]: https://www.npmjs.com/package/dotenv
+[game-controller]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html
+[game-controller-create-new-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html#createNewGame
+[game-controller-join-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html#joinGame
+[game-error]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameError.html
+[player-controller-create-player]: https://mediacomem.github.io/comem-archioweb-tictactoe/PlayerController.html#createPlayer
+[view-manager-add-joinable-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#addJoinableGame
+[view-manager-display-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#displayGame
+[view-manager-on]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#on
+[view-manager-remove-joinable-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#removeJoinableGame
 [promise]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [reverse-dns]: https://en.wikipedia.org/wiki/Reverse_domain_name_notation
 [wamp]: https://wamp-proto.org
