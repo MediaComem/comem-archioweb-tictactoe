@@ -644,7 +644,7 @@ The `joinGame` procedure is now ready to be called by other WAMP clients.
 
 
 
-## Frontend: call the `joinGame` procedure when the user clicks the Join Game button
+## Frontend: call the procedure to join a game when the user clicks the Join Game button
 
 For your opponent to join the game, he or she will click on the Join Game
 button. The `ViewManager` will emit a `joinGame` event with the game ID when
@@ -681,7 +681,7 @@ in window 1 and join it in window 2**.
 
 
 
-## Backend: publish the `joinableGameRemoved` event when a game starts
+## Backend: publish an event to notify players that a game can no longer be joined
 
 Just as you published an event earlier to notify players that a joinable game
 was added, you must now notify other players that a game is no longer joinable
@@ -706,7 +706,7 @@ are no longer joinable.
 
 
 
-## Frontend: subscribe to the `joinableGameRemoved` event
+## Frontend: subscribe to the event to remove the joinable game from the list
 
 **Add the following code to `connection.onopen` callback in the `COMMUNICATIONS`
 section** to subscribe to the new `joinableGameRemoved` topic on the frontend:
