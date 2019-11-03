@@ -1,4 +1,4 @@
-# WebSockets & WAMP Exercise
+# Web-Oriented Architecture Tic-Tac-Toe Exercise
 
 This is an exercise for the [COMEM+ Web-Oriented Architecture Course][course].
 
