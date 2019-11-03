@@ -21,9 +21,9 @@ backend and frontend.
 - [Backend: publish an event to notify players that a new game can be joined](#backend-publish-an-event-to-notify-players-that-a-new-game-can-be-joined)
 - [Frontend: subscribe to the event to display new joinable games](#frontend-subscribe-to-the-event-to-display-new-joinable-games)
 - [Backend: register a procedure to join a game](#backend-register-a-procedure-to-join-a-game)
-- [Frontend: call the `joinGame` procedure when the user clicks the Join Game button](#frontend-call-the-joingame-procedure-when-the-user-clicks-the-join-game-button)
-- [Backend: publish the `joinableGameRemoved` event when a game starts](#backend-publish-the-joinablegameremoved-event-when-a-game-starts)
-- [Frontend: subscribe to the `joinableGameRemoved` event](#frontend-subscribe-to-the-joinablegameremoved-event)
+- [Frontend: call the procedure to join a game when the user clicks the Join Game button](#frontend-call-the-procedure-to-join-a-game-when-the-user-clicks-the-join-game-button)
+- [Backend: publish an event to notify players that a game can no longer be joined](#backend-publish-an-event-to-notify-players-that-a-game-can-no-longer-be-joined)
+- [Frontend: subscribe to the event to remove the joinable game from the list](#frontend-subscribe-to-the-event-to-remove-the-joinable-game-from-the-list)
 - [Backend & frontend: implement the rest](#backend--frontend-implement-the-rest)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
