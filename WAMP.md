@@ -6,6 +6,26 @@ backend and frontend.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Tips](#tips)
+- [Set up a WAMP router](#set-up-a-wamp-router)
+  - [Configure an authentication secret](#configure-an-authentication-secret)
+- [Backend & frontend: connect to the WAMP router](#backend--frontend-connect-to-the-wamp-router)
+- [Configure your namespace](#configure-your-namespace)
+- [Backend: register a procedure to initialize a player](#backend-register-a-procedure-to-initialize-a-player)
+- [Frontend: call the player registration procedure after connecting to the router](#frontend-call-the-player-registration-procedure-after-connecting-to-the-router)
+- [Backend: register a procedure to create a new tic-tac-toe game](#backend-register-a-procedure-to-create-a-new-tic-tac-toe-game)
+- [Frontend: update the error handling function to recognize game-related errors](#frontend-update-the-error-handling-function-to-recognize-game-related-errors)
+- [Frontend: call the game creation procedure when the user clicks on the Create Game button](#frontend-call-the-game-creation-procedure-when-the-user-clicks-on-the-create-game-button)
+- [Backend: publish an event to notify players that a new game can be joined](#backend-publish-an-event-to-notify-players-that-a-new-game-can-be-joined)
+- [Frontend: subscribe to the event to display new joinable games](#frontend-subscribe-to-the-event-to-display-new-joinable-games)
+- [Backend: register a procedure to join a game](#backend-register-a-procedure-to-join-a-game)
+- [Frontend: call the `joinGame` procedure when the user clicks the Join Game button](#frontend-call-the-joingame-procedure-when-the-user-clicks-the-join-game-button)
+- [Backend: publish the `joinableGameRemoved` event when a game starts](#backend-publish-the-joinablegameremoved-event-when-a-game-starts)
+- [Frontend: subscribe to the `joinableGameRemoved` event](#frontend-subscribe-to-the-joinablegameremoved-event)
+- [Backend & frontend: implement the rest](#backend--frontend-implement-the-rest)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 

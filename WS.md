@@ -5,6 +5,24 @@ implement the communications between the tic-tac-toe backend and frontend.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Tips](#tips)
+- [Backend: set up a WebSocket server](#backend-set-up-a-websocket-server)
+- [Frontend: open a WebSocket connection to the backend](#frontend-open-a-websocket-connection-to-the-backend)
+- [Backend: create a tic-tac-toe player for each new WebSocket client](#backend-create-a-tic-tac-toe-player-for-each-new-websocket-client)
+- [Backend: send created players to their respective clients](#backend-send-created-players-to-their-respective-clients)
+- [Frontend: dispatch backend messages and store the created player](#frontend-dispatch-backend-messages-and-store-the-created-player)
+- [Frontend: implement the Create Game button](#frontend-implement-the-create-game-button)
+- [Backend: create and start tic-tac-toe games](#backend-create-and-start-tic-tac-toe-games)
+- [Frontend: display started games](#frontend-display-started-games)
+- [Backend: notify frontend clients that new games can be joined](#backend-notify-frontend-clients-that-new-games-can-be-joined)
+- [Frontend: display joinable games](#frontend-display-joinable-games)
+- [Frontend: request to join a game](#frontend-request-to-join-a-game)
+- [Backend: make players join existing games](#backend-make-players-join-existing-games)
+- [Frontend: handle the `removeJoinableGame` command](#frontend-handle-the-removejoinablegame-command)
+- [Backend & frontend: implement the rest](#backend--frontend-implement-the-rest)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
