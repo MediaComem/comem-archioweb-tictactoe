@@ -158,6 +158,8 @@ Environment variable(s)      | Default value                  | Description
 * Improve ID generation
 * Show who is currently playing
 * Uglify client code & add source maps
+* Document jsdoc usage
+* Document npm scripts
 
 
 
