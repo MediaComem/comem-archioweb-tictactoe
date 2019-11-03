@@ -155,7 +155,7 @@
       tags: [ wamp ]
 
     - name: Run crossbar.io router
-      command: docker-compose up -d router
+      command: docker-compose up -d --force-recreate router
       args:
         chdir: /etc/wamp
       tags: [ wamp ]
