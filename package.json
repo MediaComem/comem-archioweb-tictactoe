@@ -5,6 +5,7 @@
   "main": "app/backend/bin/www",
   "scripts": {
     "backend:watch": "nodemon",
+    "build": "npm run frontend:build",
     "docker:build": "docker build -t comem-archioweb-tic-tac-toe .",
     "docs:build": "jsdoc -d docs -r app",
     "docs:watch": "onchange \"app/**/*.js\" -- npm run docs:build",
