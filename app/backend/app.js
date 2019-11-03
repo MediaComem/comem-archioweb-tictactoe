@@ -9,6 +9,7 @@ const app = express();
 const logger = createLogger('express');
 
 app.use(connectLogger(logger, { level: 'TRACE' }));
+app.use('/docs', express.static(path.join(__dirname, '..', '..', 'docs')));
 app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 
 // Catch 404 and forward to error handler.
