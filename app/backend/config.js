@@ -3,12 +3,15 @@
  * environment if available.
  * @exports app/backend/config
  */
-const dotenv = require('dotenv');
 const { getLogger } = require('log4js');
 
 const logLevels = [ 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL' ];
 
-dotenv.config();
+try {
+  require('dotenv').config();
+} catch (err) {
+  // Ignore .env file if dotenv is not available
+}
 
 /**
  * The current log level of the application. The higher (closer to
