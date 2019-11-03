@@ -131,6 +131,7 @@ Environment variable(s)      | Default value | Description
 * Add browser auto-refresh for development
 * Fix memory leaks (games accumulate in the game manager)
 * Improve ID generation
+* Show who is currently playing
 
 
 

@@ -18,9 +18,10 @@ backend and frontend.
   after refreshing your browser. Keep an eye on your browser's developer console
   and on the terminal where your are running the backend. Various **messages
   will be logged** to indicate what is happening.
-* **Edit the correct file:** when a step is titled `Backend: ...`, it means that
-  you must edit the `app/backend/dispatcher.js` file. Conversely, when a step is
-  titled `Frontend: ...`, you must edit the `app/frontend/dispatcher.js` file.
+* **Edit the correct file:** when a step is titled **Backend: ...**, it means
+  that you must edit the `app/backend/dispatcher.js` file. Conversely, when a
+  step is titled **Frontend: ...**, you must edit the
+  `app/frontend/dispatcher.js` file.
 * The mention `// <PREVIOUS CODE HERE...>` indicates that you should add new
   code underneath the code you previously added in a given section. Unless
   specified otherwise, you should never have to delete code.
