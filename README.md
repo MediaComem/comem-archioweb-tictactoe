@@ -11,6 +11,7 @@ This is an exercise for the [COMEM+ Web-Oriented Architecture Course][course].
   - [The goal](#the-goal)
   - [Getting started](#getting-started)
   - [Implement real-time communications](#implement-real-time-communications)
+- [Resources](#resources)
 - [Contributing](#contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -87,6 +88,13 @@ Follow one of these guides:
 
 
 
+## Resources
+
+* [Demo of the WebSockets implementation][demo]
+* [Source code documentation][docs]
+
+
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -94,6 +102,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 [course]: https://github.com/MediaComem/comem-archioweb
+[demo]: https://comem-archioweb-tictactoe.herokuapp.com/
+[docs]: https://mediacomem.github.io/comem-archioweb-tictactoe/
 [express]: https://expressjs.com
 [jquery]: https://jquery.com
 [node]: https://nodejs.org
