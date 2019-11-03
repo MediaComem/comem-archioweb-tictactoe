@@ -5,58 +5,7 @@
   "workers": [
     {
       "type": "router",
-      "realms": [
-        {
-          "name": "realm1",
-          "roles": [
-            {
-              "name": "anonymous",
-              "permissions": [
-                {
-                  "uri": "",
-                  "match": "prefix",
-                  "allow": {
-                    "call": true,
-                    "register": true,
-                    "publish": true,
-                    "subscribe": true
-                  },
-                  "disclose": {
-                    "caller": false,
-                    "publisher": false
-                  },
-                  "cache": true
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "realm2",
-          "roles": [
-            {
-              "name": "jdoe",
-              "permissions": [
-                {
-                  "uri": "",
-                  "match": "prefix",
-                  "allow": {
-                    "call": true,
-                    "register": true,
-                    "publish": true,
-                    "subscribe": true
-                  },
-                  "disclose": {
-                    "caller": false,
-                    "publisher": false
-                  },
-                  "cache": true
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      "realms": {{ wamp_realms | to_json }},
       "transports": [
         {
           "type": "web",
@@ -88,21 +37,7 @@
           "websocket": {
             "ws": {
               "type": "websocket",
-              "auth": {
-                "anonymous": {
-                  "type": "static",
-                  "role": "anonymous"
-                },
-                "ticket": {
-                  "type": "static",
-                  "principals": {
-                    "jdoe": {
-                      "role": "jdoe",
-                      "ticket": "letmein"
-                    }
-                  }
-                }
-              },
+              "auth": {{ wamp_auth | to_json }},
               "url": "wss://{{ server_hostname }}:443/ws"
             }
           },

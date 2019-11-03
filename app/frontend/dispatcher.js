@@ -15,6 +15,8 @@ export function createFrontendDispatcher(viewManager) {
   let currentGame;
   let currentPlayer;
 
+  // TODO: declare variables and generic functions if you need them
+
   function handleError(message, code) {
     console.warn(`ERROR: received error code ${code} from backend`);
     viewManager.displayToast(message);

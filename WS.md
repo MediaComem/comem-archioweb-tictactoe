@@ -17,9 +17,10 @@ implement the communications between the tic-tac-toe backend and frontend.
   after refreshing your browser. Keep an eye on your browser's developer console
   and on the terminal where your are running the backend. Various **messages
   will be logged** to indicate what is happening.
-* **Edit the correct file:** when a step is titled `Backend: ...`, it means that
-  you must edit the `app/backend/dispatcher.js` file. Conversely, when a step is
-  titled `Frontend: ...`, you must edit the `app/frontend/dispatcher.js` file.
+* **Edit the correct file:** when a step is titled **Backend: ...**, it means
+  that you must edit the `app/backend/dispatcher.js` file. Conversely, when a
+  step is titled **Frontend: ...**, you must edit the
+  `app/frontend/dispatcher.js` file.
 * The mention `// <PREVIOUS CODE HERE...>` indicates that you should add new
   code underneath the code you previously added in a given section. Unless
   specified otherwise, you should never have to delete code.
@@ -80,7 +81,7 @@ Your tic-tac-toe backend is now ready to accept WebSocket connections.
 
 
 
-## Frontend: connect to the backend
+## Frontend: open a WebSocket connection to the backend
 
 You do not need to import the `ws` package in the frontend, since the
 `WebSocket` object is natively available in a browser's environment (as long as
@@ -89,8 +90,7 @@ you use a modern browser).
 You now want the frontend to open a WebSocket connection to the backend. Since
 frontend files are served by the backend, the URL of the backend is simply the
 current browser's location. Connecting to it is as simple as instantiating a
-[`WebSocket` object][ws-object] with the correct URL. It will emit the `open`
-event as soon as it has successfully opened a connection.
+[`WebSocket` object][ws-object] with the correct URL.
 
 **Add the following code to the `COMMUNICATIONS` section**:
 
@@ -102,10 +102,24 @@ event as soon as it has successfully opened a connection.
 const wsProtocol = window.location.protocol.startsWith('https') ? 'wss' : 'ws';
 const wsUrl = `${wsProtocol}://${window.location.hostname}:${window.location.port}`;
 const ws = new WebSocket(wsUrl);
+```
 
-ws.onopen = function() {
+The documentation of the `WebSocket` object states that it emit a number of
+events and that you can [listen to these events using the `addEventListener`
+method][ws-object-events]. Notably, it will emit the `open` event as soon as it
+has successfully opened the WebSocket connection.
+
+**Add the following code to the `COMMUNICATIONS` section**:
+
+```js
+// COMMUNICATIONS
+// ==============
+
+// <PREVIOUS CODE HERE...>
+
+ws.addEventListener('open', function() {
   console.log(`Connected to WebSocket server at ${WS_URL}`);
-};
+});
 ```
 
 If you refresh your browser window, **you should see 2 log messages**:
@@ -139,9 +153,11 @@ map player IDs to WebSocket clients:
 const clients = {};
 ```
 
-You now want to store WebSocket clients in this map as they connect. **Add the
-following code to the `wss.on('connection')` callback in the `COMMUNICATIONS`
-section**:
+Every time a client connects, you want to create a player and store the
+WebSocket client in the `clients` map. The provided `PlayerController` class has
+a [`createPlayer` method][player-controller-create-player] that will handle
+creating the player for you. **Add the following code to the
+`wss.on('connection')` callback in the `COMMUNICATIONS` section**:
 
 ```js
 wss.on('connection', function(ws) {
@@ -180,7 +196,7 @@ connects.
 
 
 
-## Backend: send the `setPlayer` command to newly connected clients
+## Backend: send created players to their respective clients
 
 Although you have created a player object in the backend, the frontend is not
 aware of this yet. It is time to send this application's first WebSocket
@@ -256,10 +272,10 @@ the developer console, select the request with the `websocket` type and open the
 
 
 
-## Frontend: handle the `setPlayer` command
+## Frontend: dispatch backend messages and store the created player
 
 The frontend must now be able to handle the `setPlayer` command. You will need
-to store the newly created player. Storing in memory is sufficient for the
+to store the newly created player. Storing it in memory is sufficient for the
 purposes of this exercise, so you can simply **add the following declaration to
 the `SETUP` section**:
 
@@ -272,20 +288,20 @@ let currentPlayer;
 
 To handle commands, you must first receive the backend's messages. The
 `WebSocket` object's `message` event is emitted every time a message is
-received. **Add the following code to the `ws.onopen` callback in the
-`COMMUNICATIONS` section**:
+received. **Add the following code to the `ws.addEventListener('open')` callback
+in the `COMMUNICATIONS` section**:
 
 ```js
-ws.onopen = function() {
+ws.addEventListener('open', function() {
   // <PREVIOUS CODE HERE...>
 
-  // Dispatch server messages.
-  ws.onmessage = function(message) {
+  // Dispatch backend messages.
+  ws.addEventListener('message', function(message) {
 
-    console.log(`Received message from server: ${message.data}`);
+    console.log(`Received message from the backend: ${message.data}`);
     const messageData = JSON.parse(message.data);
-  };
-};
+  });
+});
 ```
 
 > Note that the message data that was encoded by the backend with
@@ -298,12 +314,12 @@ Messages from the backend are now being received and decoded, but have yet to be
 handled. Since you have a well-defined message format, you can dispatch the
 handling of these messages to separate functions to limit complexity.
 
-**Add the following code to the `ws.onmessage` callback in the `COMMUNICATIONS`
-section**:
+**Add the following code to the `ws.addEventListener('message')` callback in the
+`COMMUNICATIONS` section**:
 
 ```js
 // Dispatch server messages.
-ws.onmessage = function(message) {
+ws.addEventListener('message', function(message) {
   // <PREVIOUS CODE HERE...>
 
   /**
@@ -321,7 +337,7 @@ ws.onmessage = function(message) {
       dispatchPlayerCommand(messageData.command, messageData.params);
       break;
   }
-};
+});
 ```
 
 This dispatches messages based on the `resource` property. Of course, you must
@@ -362,12 +378,39 @@ developer console**.
 
 
 
-## Frontend: send the `createGame` command when the user clicks on the Create Game button
+## Frontend: implement the Create Game button
+
+The backend/frontend interaction you implemented so far has been automatic and
+transparent, not visible to the user. It is time to start reacting to user
+actions.
+
+If you look at the documentation of the `ViewManager` class, you will see that
+emit events and that you can [listen to these events with its `on`
+method][view-manager-on]. The `createGame` event is emitted when the user clicks
+on the Create Game button. Let's react to that.
+
+**Add the following code to the `ws.addEventListener('open')` callback in the
+`COMMUNICATIONS` section**:
 
 ```js
-// Handle DOM events.
-viewManager.on('createGame', () => onCreateGameClicked(ws));
+ws.addEventListener('open', function() {
+  // <PREVIOUS CODE HERE...>
+
+  // Handle DOM events.
+  viewManager.on('createGame', () => onCreateGameClicked(ws));
+});
 ```
+
+Instead of writing the event handling code directly in the connection callback,
+it is good practice to dispatch that to a separate function. You must now
+implement this `onCreateGameClicked` function.
+
+The backend server cannot detect clicks in the frontend client running in the
+browser, so you need to tell the backend that a new tic-tac-toe game must be
+created by sending a WebSocket message. Let's send a new `createGame` command to
+the backend with our standard message format.
+
+**Add the following code to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -386,16 +429,53 @@ function onCreateGameClicked(ws) {
 }
 ```
 
+> Note that `ws`, the WebSocket client instance, is passed to the
+> `onCreateGameClicked` function as an argument so that it can use its [`send`
+> method][ws-object-send] to send a message to the server. Again, the message
+> data is serialized as JSON.
+
+Refresh your browser and click the Create Game button. **You should see the new
+message being sent in the WebSocket connection** in the developer console's
+Network tab.
 
 
-## Backend: handle the `createGame` command, send the `startGame` command
+
+## Backend: create and start tic-tac-toe games
+
+Since the backend is now receiving WebSocket messages, you should add code to
+handle them. As indicated by the documentation of the `ws` package, [you can
+listen to the `message` event to receive incoming messages][ws-server].
+
+**Add the following code to the `wss.on('connection')` callback in the
+`COMMUNICATIONS` section**:
+
+```js
+// Handle new client connections.
+wss.on('connection', function(ws) {
+  // <PREVIOUS CODE HERE...>
+
+  // Receive and dispatch messages from clients.
+  ws.on('message', function(message) {
+
+    logger.debug(`New client message: ${message}`);
+    const messageData = JSON.parse(message);
+  });
+});
+```
+
+If you refresh your browser and click the Create Game button again, you should
+now see the message being logged in the terminal where you are running the
+backend.
+
+Since the messages received by the backend are also in your standard message
+format, you should dispatch them to separate functions as well. **Add the
+following code to the `ws.on('message')` callback you just added in the
+`COMMUNICATIONS` section:
 
 ```js
 // Receive and dispatch messages from clients.
 ws.on('message', function(message) {
-
-  logger.debug(`New client message: ${message}`);
-  const messageData = JSON.parse(message);
+  // <PREVIOUS CODE HERE...>
 
   switch (messageData.resource) {
     case 'game':
@@ -404,6 +484,10 @@ ws.on('message', function(message) {
   }
 });
 ```
+
+As in the frontend, implement the `dispatchGameCommand` function to separate
+handling of messages by resource. **Add the following code to the `GAME
+MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -417,6 +501,16 @@ function dispatchGameCommand(command, params, currentPlayer) {
   }
 }
 ```
+
+Finally, the `handleCreateGameCommand` function will handle the `createGame`
+command itself. The provided `GameController` class has a [`createNewGame`
+method][game-controller-create-new-game] that will create the game for you.
+
+Once that's done, you need to send a new message to the frontend client to
+notify it that the game can be started. Let's send a new `startGame` command
+with the created game as a parameter.
+
+**Add the following code to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -434,6 +528,7 @@ function handleCreateGameCommand(playerId) {
     return handleError(playerId, err);
   }
 
+  // Tell the frontend client to start the game.
   sendMessageToPlayer(playerId, {
     resource: 'game',
     command: 'startGame',
@@ -443,6 +538,16 @@ function handleCreateGameCommand(playerId) {
   });
 }
 ```
+
+This code uses a new `handleError` function which you do not have yet. Its
+purpose is to notify the frontend client of any error that might occur while
+creating or running tic-tac-toe games. Game errors thrown by the
+`GameController` are instances of the [`GameError` class][game-error], which
+have a `code` property identifying the error and a human-readable `message`
+property.
+
+Let's define a new `error` command to send this information to the frontend
+client. **Add the following code to the `SETUP` section**:
 
 ```js
 // SETUP
@@ -464,7 +569,11 @@ function handleError(playerId, err) {
 
 
 
-## Frontend: handle the `startGame` command
+## Frontend: display started games
+
+Two new commands are now being sent from the backend to the frontend:
+`startGame` and `error`. **Add the following code to the `GAME MANAGEMENT`
+section** to dispatch them:
 
 ```js
 // GAME MANAGEMENT
@@ -473,7 +582,7 @@ function handleError(playerId, err) {
 function dispatchGameCommand(command, params) {
   switch (command) {
     case 'error':
-      handleError(`Game error: ${params.message}`);
+      handleError(params.message, params.code);
       break;
     case 'startGame':
       handleStartGameCommand(params.game);
@@ -482,6 +591,26 @@ function dispatchGameCommand(command, params) {
 }
 ```
 
+When an `error` command is received, you probably want to notify the user and
+log a message in the console for developers. **Add the following code to the
+`SETUP` section:**
+
+```js
+// SETUP
+// =====
+
+// <PREVIOUS CODE HERE...>
+
+function handleError(message, code) {
+  console.warn(`ERROR: received error code ${code} from backend`);
+  viewManager.displayToast(message);
+}
+```
+
+Before handling the `startGame` command, you will need to store the current game
+once it has started. Again, storing it in memory is sufficient for the purposes
+of this exercise. **Add the following declaration to the `SETUP` section**:
+
 ```js
 // SETUP
 // =====
@@ -489,11 +618,12 @@ function dispatchGameCommand(command, params) {
 // <PREVIOUS CODE HERE...>
 
 let currentGame;
-
-function handleError(message) {
-  viewManager.displayToast(message);
-}
 ```
+
+You are now ready to store and start the game with the `handleStartGameCommand`
+function. The provided `ViewManager` has a [`displayGame`
+method][view-manager-display-game] that will display the game in the user
+interface. **Add the following code to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -507,47 +637,88 @@ function handleStartGameCommand(game) {
 }
 ```
 
+Refresh your browser and **you should now be able to start a tic-tac-toe game**
+by clicking on the Create Game button.
 
 
-## Backend: handle the `addJoinableGames` command
 
-**NOTE:** you will need 2 browser windows (i.e. 2 players) to test the application from now on.
+## Backend: notify frontend clients that new games can be joined
+
+Starting a tic-tac-toe game is all well and good, but you need an opponent to
+face you in battle!
+
+In order to join a game, your opponent must know it exists. Let's define a new
+`addJoinableGames` command that the backend can send to the frontend with a list
+of games that can be joined. There are 2 times a frontend client needs to be
+notified of new joinable games: when it first connects, and every time a new
+game is created.
+
+The provided `GameController` has a [`getJoinableGames`
+method][game-controller-get-joinable-games] that gives you the list of currently
+joinable games. **Add the following code to the `wss.on('connection')` callback
+in the `COMMUNICATIONS` section** to send them to new clients:
 
 ```js
-for (const player of gameManager.players) {
-  if (player.id !== playerId) {
-    sendMessageToPlayer(player.id, {
-      resource: 'game',
-      command: 'addJoinableGames',
-      params: {
-        games: [ newGame ]
-      }
-    });
+// Handle new client connections.
+wss.on('connection', function(ws) {
+  // <PREVIOUS CODE HERE...>
+
+  // Send currently joinable games to the client.
+  sendMessageToPlayer(newPlayer.id, {
+    resource: 'game',
+    command: 'addJoinableGames',
+    params: {
+      games: gameController.getJoinableGames()
+    }
+  });
+});
+```
+
+**Add the following code to the `handleCreateGameCommand` in the `GAME
+MANAGEMENT` section** to notify players in real-time when a new game is
+available:
+
+```js
+function handleCreateGameCommand(playerId) {
+  // <PREVIOUS CODE HERE...>
+
+  // Tell all other frontend clients that a new joinable game is available.
+  for (const player of gameManager.players) {
+    if (player.id !== playerId) {
+      sendMessageToPlayer(player.id, {
+        resource: 'game',
+        command: 'addJoinableGames',
+        params: {
+          games: [ newGame ]
+        }
+      });
+    }
   }
 }
 ```
 
-```js
-// Send currently joinable games to the client.
-const currentGames = gameController.getJoinableGames();
-sendMessageToPlayer(newPlayer.id, {
-  resource: 'game',
-  command: 'addJoinableGames',
-  params: {
-    games: currentGames
-  }
-});
-```
+> Note the `if (player.id !== playerId)` condition. When a player starts a game,
+> you only need to notify other players that a new game can be joined. The
+> player who created the game will already be in it.
 
 
 
-## Frontend: handle the `addJoinableGames` command
+## Frontend: display joinable games
+
+**Add the following case to the switch in the `dispatchGameCommand` function in
+the `GAME MANAGEMENT` section** to dispatch the new `addJoinableGames` command
+from the backend:
 
 ```js
 case 'addJoinableGames':
   handleAddJoinableGamesCommand(params.games);
   break;
 ```
+
+The `ViewManager` class has an [`addJoinableGame`
+method][view-manager-add-joinable-game] that can be used to display a new game
+in the interface. **Add the following function to the `GAME MANAGEMENT`
+section** to display the games sent in the `addJoinableGames` command:
 
 ```js
 // GAME MANAGEMENT
@@ -562,13 +733,33 @@ function handleAddJoinableGamesCommand(games) {
 }
 ```
 
+Refresh your browser window and open a new one. **You will now need 2 browser
+windows to test the application**, since you need 2 players.
+
+Create a game in window 1 and **you should see it appear in real time** in
+window 2. If you refresh window 2, **you should also be able to see the game
+appear as the client first connects**.
 
 
-## Frontend: send the `joinGame` command when the user clicks the Join Game button
+
+## Frontend: request to join a game
+
+For your opponent to join the game, he or she will click on the Join Game
+button. The `ViewManager` will emit a `joinGame` event with the game ID when
+that occurs. **Add the following code to the `ws.addEventListener('open')`
+callback** to listen to that event:
 
 ```js
-viewManager.on('joinGame', gameId => onJoinGameClicked(ws, gameId));
+ws.addEventListener('open', function() {
+  // <PREVIOUS CODE HERE...>
+
+  viewManager.on('joinGame', gameId => onJoinGameClicked(ws, gameId));
+});
 ```
+
+The backend must be notified that a player wants to join the game. **Add the
+following function to the `GAME MANAGEMENT` section** to send a new `joinGame`
+command to the backend:
 
 ```js
 // GAME MANAGEMENT
@@ -589,13 +780,27 @@ function onJoinGameClicked(ws, gameId) {
 
 
 
-## Backend: handle the `joinGame` command, send the `startGame` and `removeJoinable` commands
+## Backend: make players join existing games
+
+**Add the following case to the switch in the `dispatchGameCommand` function in
+the `GAME MANAGEMENT` section** to dispatch the new `joinGame` command from the
+frontend:
 
 ```js
 case 'joinGame':
   handleJoinGameCommand(params.gameId, currentPlayer.id);
   break;
 ```
+
+The provided `GameController` has a [`joinGame`
+method][game-controller-join-game] you can use to make the player join the game.
+
+When an opponent joins a game, 2 things need to happen: the game interface needs
+to show up for the opponent, and the game needs to be removed from the list of
+joinable games for other players. You already have the `startGame` command for
+the former, but you will need a new `removeJoinableGame` command for the latter.
+
+**Add the following function to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -613,6 +818,7 @@ function handleJoinGameCommand(gameId, playerId) {
     return handleError(playerId, err);
   }
 
+  // Tell the frontend client to start the game.
   sendMessageToPlayer(playerId, {
     resource: 'game',
     command: 'startGame',
@@ -621,6 +827,7 @@ function handleJoinGameCommand(gameId, playerId) {
     }
   });
 
+  // Tell all frontend clients that the game is no longer joinable.
   for (const player of gameManager.players) {
     sendMessageToPlayer(player.id, {
       resource: 'game',
@@ -633,15 +840,27 @@ function handleJoinGameCommand(gameId, playerId) {
 }
 ```
 
+Refresh both your browser windows and **you should now be able to create a game
+in window 1 and join it in window 2**.
+
 
 
 ## Frontend: handle the `removeJoinableGame` command
+
+**Add the following case to the switch in the `dispatchGameCommand` function in
+the `GAME MANAGEMENT` section** to dispatch the new `removeJoinableGame`
+command:
 
 ```js
 case 'removeJoinableGame':
   handleRemoveJoinableGameCommand(params.gameId);
   break;
 ```
+
+The provided `ViewManager` class has a [`removeJoinable`
+game][view-manager-remove-joinable-game] that does the opposite of the
+`addJoinableGame` method: it removes a game from the list. **Add the following
+function to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -654,18 +873,65 @@ function handleRemoveJoinableGameCommand(gameId) {
 }
 ```
 
+Refresh both your browser windows. To test this, you need a third browser
+window. Create a game in window 1, **you should see it appear in both windows 2
+and 3**. Join the game in window 2, and **you should see it disappear from
+window 3** as it is no longer joinable.
 
 
-## Implement the rest
 
-```js
-viewManager.on('play', (col, row) => onBoardClicked(ws, col, row));
-viewManager.on('leaveGame', () => onLeaveGameClicked(ws));
-```
+## Backend & frontend: implement the rest
+
+The rest of the functionality is yours to implement.
+
+There are 2 DOM events that are not yet handled:
+
+* During a game, the `play` event is emitted when the player clicks on the
+  board. The column (0-2 from left to right) and row (0-2 from top to bottom)
+  identifying the board cell are provided.
+
+  You need to listen to this event and handle it with a new game management
+  function:
+
+  ```js
+  viewManager.on('play', (col, row) => onBoardCellClicked(ws, col, row));
+  ```
+* During a game, the `leaveGame` event is emitted when the player clicks on the
+  Leave Game button.
+
+  You need to listen to this event and handle it with a new game management
+  function:
+
+  ```js
+  viewManager.on('leaveGame', () => onLeaveGameClicked(ws));
+  ```
+
+You will probably need to define new commands for these actions and send them to
+the backend. Then you need to dispatch and handle those commands in the backend.
+
+For the backend, look at the documentation of the [`GameController`
+class][game-controller] and see what methods you need to call to handle the new
+commands.
+
+The backend will probably also need to send new commands to the frontend once
+the actions have been performed.
 
 
+
+TOLINK: game-error
+TOLINK: game-controller
+TOLINK: game-controller-create-new-game
+TOLINK: game-controller-get-joinable-games
+TOLINK: game-controller-join-game
+TOLINK: player-controller-create-player
+TOLINK: view-manager-add-joinable-game
+TOLINK: view-manager-display-game
+TOLINK: view-manager-on
+TOLINK: view-manager-remove-joinable-game
 
 [ws]: https://en.wikipedia.org/wiki/WebSocket
 [ws-npm]: https://www.npmjs.com/package/ws
 [ws-object]: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+[ws-object-events]: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Events
+[ws-object-send]: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send
 [ws-server]: https://www.npmjs.com/package/ws#simple-server

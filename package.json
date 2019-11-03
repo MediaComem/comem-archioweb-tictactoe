@@ -24,6 +24,14 @@
     }
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MediaComem/comem-archioweb-tictactoe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MediaComem/comem-archioweb-tictactoe/issues"
+  },
+  "homepage": "https://github.com/MediaComem/comem-archioweb-tictactoe#readme",
   "dependencies": {
     "bootstrap": "^4.3.1",
     "express": "^4.17.1",
@@ -41,6 +49,7 @@
     "concurrently": "^5.0.0",
     "css-loader": "^3.2.0",
     "doctoc": "^1.4.0",
+    "dotenv": "^8.2.0",
     "eslint": "^6.6.0",
     "eslint-plugin-sort-requires-by-path": "^1.0.2",
     "jsdoc": "^3.6.3",

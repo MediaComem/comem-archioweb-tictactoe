@@ -60,6 +60,7 @@ class GameManager {
    * @param {string} playerId The player's ID.
    */
   removePlayer(playerId) {
+    // FIXME: do this in the controller and also close any game this player might be playing in
     const playerIndex = this.players.findIndex(player => player.id === playerId);
     if (playerIndex >= 0) {
       this.players.splice(0, 1);
