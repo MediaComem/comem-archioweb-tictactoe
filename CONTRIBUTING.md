@@ -13,6 +13,7 @@ read the [README.md](README.md).
   - [Run in development mode](#run-in-development-mode)
   - [Run in production mode](#run-in-production-mode)
   - [Run with Docker](#run-with-docker)
+  - [Set up a WAMP router on a cloud server](#set-up-a-wamp-router-on-a-cloud-server)
 - [Branches](#branches)
   - [`master`](#master)
   - [`ws-solution`](#ws-solution)
