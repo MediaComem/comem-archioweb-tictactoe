@@ -2,7 +2,7 @@
  * This file handles the frontend client's communications with the backend.
  * @module app/frontend/dispatcher
  */
-const autobahn = require('autobahn');
+import autobahn from 'autobahn';
 
 /**
  * Creates the frontend's dispatcher.
@@ -10,11 +10,15 @@ const autobahn = require('autobahn');
  */
 export function createFrontendDispatcher(viewManager) {
 
+  const namespace = TICTACTOE_NAMESPACE;
+  const secret = TICTACTOE_SECRET;
+
   let currentGame;
   let currentPlayer;
+  const currentGameSubscriptions = [];
 
   function handleError(err) {
-    if (err.error === 'ch.comem.archioweb.tictactoe.gameError') {
+    if (err.error === `${namespace}.gameError`) {
       viewManager.displayToast(err.kwargs.message);
     } else {
       viewManager.displayToast('An unexpected error occurred');
@@ -29,19 +33,19 @@ export function createFrontendDispatcher(viewManager) {
       return viewManager.displayToast('No player information available');
     }
 
-    session.call('ch.comem.archioweb.tictactoe.createGame', [], { playerId: currentPlayer.id }).then(newGame => {
+    session.call(`${namespace}.createGame`, [], { playerId: currentPlayer.id }).then(newGame => {
       startGame(session, newGame, currentPlayer);
     }).catch(handleError);
   }
 
   function onJoinGameClicked(session, gameId, playerId) {
-    session.call('ch.comem.archioweb.tictactoe.joinGame', [], { gameId, playerId }).then(result => {
+    session.call(`${namespace}.joinGame`, [], { gameId, playerId }).then(result => {
       startGame(session, result.game, currentPlayer);
     }).catch(handleError);
   }
 
   function onBoardCellClicked(session, gameId, playerId, col, row) {
-    session.call('ch.comem.archioweb.tictactoe.play', [], { gameId, playerId, col, row }).catch(handleError);
+    session.call(`${namespace}.play`, [], { gameId, playerId, col, row }).catch(handleError);
   }
 
   function onLeaveGameClicked(session) {
@@ -49,7 +53,7 @@ export function createFrontendDispatcher(viewManager) {
       return;
     }
 
-    session.call('ch.comem.archioweb.tictactoe.leaveGame', [], { gameId: currentGame.id, playerId: currentPlayer.id }).catch(handleError);
+    session.call(`${namespace}.leaveGame`, [], { gameId: currentGame.id, playerId: currentPlayer.id }).catch(handleError);
   }
 
   function onJoinableGameAdded(game) {
@@ -66,27 +70,30 @@ export function createFrontendDispatcher(viewManager) {
     }
   }
 
-  function onGameLeft(session, subscriptions, playerId) {
+  function onGameLeft(session, playerId) {
 
     viewManager.displayToast(playerId === currentPlayer.id ? 'You have left the game' : 'Your opponent has left the game');
     viewManager.leaveGame();
 
-    subscriptions.forEach(sub => session.unsubscribe(sub));
+    // Unsubscribe from the game's topics.
+    currentGameSubscriptions.forEach(sub => session.unsubscribe(sub));
+    currentGameSubscriptions.length = 0;
   }
 
   function startGame(session, game, player) {
     currentGame = game;
-    const subscriptions = [];
 
+    // Subscribe to played moves.
     session.subscribe(
-      `ch.comem.archioweb.tictactoe.games.${game.id}.played`,
+      `${namespace}.games.${game.id}.played`,
       (args, params) => onGameMovePlayed(params.col, params.row, params.icon, params.status)
-    ).then(sub => subscriptions.push(sub));
+    ).then(sub => currentGameSubscriptions.push(sub));
 
+    // Subscribe to players leaving the game.
     session.subscribe(
-      `ch.comem.archioweb.tictactoe.games.${game.id}.left`,
-      (args, params) => onGameLeft(session, subscriptions, params.playerId)
-    ).then(sub => subscriptions.push(sub));
+      `${namespace}.games.${game.id}.left`,
+      (args, params) => onGameLeft(session, params.playerId)
+    ).then(sub => currentGameSubscriptions.push(sub));
 
     viewManager.displayGame(game, player);
   }
@@ -100,36 +107,37 @@ export function createFrontendDispatcher(viewManager) {
 
   const connection = new autobahn.Connection({
     url: 'wss://wamp.archidep.media/ws',
-    realm: 'realm1'
-    // Authentication:
-    // authid: 'jdoe',
-    // authmethods: [ 'ticket' ],
-    // onchallenge: function() {
-    // console.log('@@@ on challenge', JSON.stringify(Array.prototype.slice(arguments)));
-    // return 'letmein';
-    // }
+    realm: 'tictactoe',
+    authid: 'tictactoe',
+    authmethods: [ 'ticket' ],
+    onchallenge: function() {
+      return secret;
+    }
   });
 
   connection.onopen = function(session) {
     console.log('Connection to WAMP router established');
 
-    session.call('ch.comem.archioweb.tictactoe.initPlayer', []).then(result => {
+    // Initialize a player once connected to the router.
+    session.call(`${namespace}.initPlayer`, [], {}).then(result => {
 
       currentPlayer = result.player;
       console.log(`Player ID is ${result.player.id}`);
 
+      for (const game of result.games) {
+        onJoinableGameAdded(game);
+      }
+
+      // Handle DOM events.
       viewManager.on('createGame', () => onCreateGameClicked(session));
       viewManager.on('joinGame', gameId => onJoinGameClicked(session, gameId, currentPlayer.id));
       viewManager.on('play', (col, row) => onBoardCellClicked(session, currentGame.id, currentPlayer.id, col, row));
       viewManager.on('leaveGame', () => onLeaveGameClicked(session));
-
-      for (const game of result.games) {
-        onJoinableGameAdded(game);
-      }
     }).catch(handleError);
 
-    session.subscribe('ch.comem.archioweb.tictactoe.joinableGames.added', (args, params) => onJoinableGameAdded(params.game));
-    session.subscribe('ch.comem.archioweb.tictactoe.joinableGames.removed', (args, params) => onJoinableGameRemoved(params.gameId));
+    // Subscribe to joinable game events.
+    session.subscribe(`${namespace}.joinableGameAdded`, (args, params) => onJoinableGameAdded(params.game));
+    session.subscribe(`${namespace}.joinableGameRemoved`, (args, params) => onJoinableGameRemoved(params.gameId));
   };
 
   connection.open();

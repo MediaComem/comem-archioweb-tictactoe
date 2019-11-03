@@ -6,7 +6,7 @@ const autobahn = require('autobahn');
 
 const GameError = require('../class/game-error.class');
 const GameManager = require('../class/game-manager.class');
-const { createLogger } = require('./config');
+const { createLogger, namespace, secret } = require('./config');
 const GameController = require('./controller/game.controller');
 const PlayerController = require('./controller/player.controller');
 
@@ -26,10 +26,16 @@ exports.createBackendDispatcher = function() {
 
   function handleError(err) {
     if (err instanceof GameError) {
-      throw new autobahn.Error('ch.comem.archioweb.tictactoe.gameError', [], { code: err.code, message: err.message });
+      // Send game error details to the Caller if this is a game-related error.
+      throw new autobahn.Error(`${namespace}.gameError`, [], { code: err.code, message: err.message });
     } else {
       throw err;
     }
+  }
+
+  function onRegistrationFailure(err) {
+    logger.fatal(err);
+    process.exit(1);
   }
 
   // GAME MANAGEMENT
@@ -45,7 +51,8 @@ exports.createBackendDispatcher = function() {
       return handleError(err);
     }
 
-    session.publish('ch.comem.archioweb.tictactoe.joinableGames.added', [], { game: newGame });
+    // Notify subscribers that the game can now be joined.
+    session.publish(`${namespace}.joinableGameAdded`, [], { game: newGame });
 
     return newGame;
   }
@@ -60,7 +67,8 @@ exports.createBackendDispatcher = function() {
       return handleError(err);
     }
 
-    session.publish('ch.comem.archioweb.tictactoe.joinableGames.removed', [], { gameId });
+    // Notify subscribers that the game is no longer joinable.
+    session.publish(`${namespace}.joinableGameRemoved`, [], { gameId });
 
     return result;
   }
@@ -75,6 +83,7 @@ exports.createBackendDispatcher = function() {
       return handleError(err);
     }
 
+    // Check the status of the game.
     let status;
     if (result.win) {
       status = 'win';
@@ -86,7 +95,8 @@ exports.createBackendDispatcher = function() {
       logger.info(`Game ${gameId} is a ${status}`);
     }
 
-    session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.played`, [], { col, row, status, icon: result.icon });
+    // Notify subscribers to the game's "played" topic of the move.
+    session.publish(`${namespace}.games.${gameId}.played`, [], { col, row, status, icon: result.icon });
   }
 
   function leaveGame(session, gameId, playerId) {
@@ -98,8 +108,11 @@ exports.createBackendDispatcher = function() {
       return handleError(err);
     }
 
-    session.publish(`ch.comem.archioweb.tictactoe.games.${gameId}.left`, [], { playerId });
-    session.publish('ch.comem.archioweb.tictactoe.joinableGames.removed', [], { gameId });
+    // Notify subscribers to the game's "left" topic that the player left.
+    session.publish(`${namespace}.games.${gameId}.left`, [], { playerId });
+
+    // Notify subscribers that the game is no longer joinable.
+    session.publish(`${namespace}.joinableGameRemoved`, [], { gameId });
   }
 
   // PLAYER MANAGEMENT
@@ -121,23 +134,21 @@ exports.createBackendDispatcher = function() {
 
   const connection = new autobahn.Connection({
     url: 'wss://wamp.archidep.media/ws',
-    realm: 'realm1'
-    // Authentication:
-    // authid: 'jdoe',
-    // authmethods: [ 'ticket' ],
-    // onchallenge: function() {
-    // console.log('@@@ on challenge', JSON.stringify(Array.prototype.slice(arguments)));
-    // return 'letmein';
-    // }
+    realm: 'tictactoe',
+    authid: 'tictactoe',
+    authmethods: [ 'ticket' ],
+    onchallenge: function() {
+      return secret;
+    }
   });
 
   connection.onopen = function(session) {
     logger.info('Connection to WAMP router established');
-    session.register('ch.comem.archioweb.tictactoe.initPlayer', () => initPlayer());
-    session.register('ch.comem.archioweb.tictactoe.createGame', (args, params) => createGame(session, params.playerId));
-    session.register('ch.comem.archioweb.tictactoe.joinGame', (args, params) => joinGame(session, params.gameId, params.playerId));
-    session.register('ch.comem.archioweb.tictactoe.play', (args, params) => play(session, params.gameId, params.playerId, params.col, params.row));
-    session.register('ch.comem.archioweb.tictactoe.leaveGame', (args, params) => leaveGame(session, params.gameId, params.playerId));
+    session.register(`${namespace}.initPlayer`, () => initPlayer()).catch(onRegistrationFailure);
+    session.register(`${namespace}.createGame`, (args, params) => createGame(session, params.playerId)).catch(onRegistrationFailure);
+    session.register(`${namespace}.joinGame`, (args, params) => joinGame(session, params.gameId, params.playerId)).catch(onRegistrationFailure);
+    session.register(`${namespace}.play`, (args, params) => play(session, params.gameId, params.playerId, params.col, params.row)).catch(onRegistrationFailure);
+    session.register(`${namespace}.leaveGame`, (args, params) => leaveGame(session, params.gameId, params.playerId)).catch(onRegistrationFailure);
   };
 
   connection.open();
