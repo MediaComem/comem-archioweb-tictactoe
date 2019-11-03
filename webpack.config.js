@@ -1,4 +1,8 @@
+const dotenv = require('dotenv');
 const path = require('path');
+const webpack = require('webpack');
+
+dotenv.config();
 
 module.exports = {
   entry: './app/frontend/index.js',
@@ -29,5 +33,11 @@ module.exports = {
   performance: {
     maxAssetSize: 1024 * 1024,
     maxEntrypointSize: 512 * 1024
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      TICTACTOE_NAMESPACE: JSON.stringify(process.env.TICTACTOE_NAMESPACE || ''),
+      TICTACTOE_SECRET: JSON.stringify(process.env.TICTACTOE_SECRET || '')
+    })
+  ]
 };

@@ -17,6 +17,8 @@ export function createFrontendDispatcher(viewManager) {
   let currentPlayer;
   const currentGameSubscriptions = [];
 
+  // TODO: declare variables and generic functions if you need them
+
   function handleError(err) {
     if (err.error === `${namespace}.gameError`) {
       viewManager.displayToast(err.kwargs.message);

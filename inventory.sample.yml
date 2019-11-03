@@ -5,5 +5,39 @@ all:
       ansible_host: 1.2.3.4
       ansible_user: root
   vars:
+
+    # Used to register a Let's Encrypt account with Certbot.
     server_email: john.doe@example.com
+
+    # Used to construct the WAMP router URL and as the domain name for the
+    # requested Let's Encrypt certificate.
     server_hostname: wamp.example.com
+
+    # This section is injected directly into the WAMP router's JSON
+    # configuration file. See https://crossbar.io/docs/Authentication/.
+    wamp_auth:
+      ticket:
+        type: static
+        principals:
+          tictactoe:
+            role: tictactoe
+            ticket: changeme
+
+    # This section is injected directly into the WAMP router's JSON
+    # configuration file. See https://crossbar.io/docs/Router-Realms/.
+    wamp_realms:
+      - name: tictactoe
+        roles:
+          - name: tictactoe
+            permissions:
+              - uri: ch.comem.archioweb.tictactoe.
+                match: prefix
+                allow:
+                  call: true
+                  register: true
+                  publish: true
+                  subscribe: true
+                disclose:
+                  caller: false
+                  publisher: false
+                cache: true

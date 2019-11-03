@@ -16,6 +16,10 @@
   "plugins": [
     "sort-requires-by-path"
   ],
+  "globals": {
+    "TICTACTOE_NAMESPACE": "readonly",
+    "TICTACTOE_SECRET": "readonly"
+  },
   "rules": {
     "array-bracket-newline": ["error", "consistent"],
     "array-bracket-spacing": [ "error", "always" ],
