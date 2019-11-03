@@ -1,10 +1,6 @@
 # WebSockets & WAMP Exercise
 
 This is an exercise for the [COMEM+ Web-Oriented Architecture Course][course].
-It assumes you are familiar with the following subjects:
-
-* [WebSockets][ws-subject]
-* [Web Application Messaging Protocol (WAMP)][wamp-subject]
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -18,6 +14,11 @@ It assumes you are familiar with the following subjects:
 - [Contributing](#contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+The exercise assumes you are familiar with the following subjects of the course:
+
+* [WebSockets][ws-subject]
+* [Web Application Messaging Protocol (WAMP)][wamp-subject]
 
 
 
