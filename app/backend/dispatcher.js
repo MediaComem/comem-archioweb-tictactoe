@@ -56,6 +56,16 @@ exports.createBackendDispatcher = function(server) {
       return handleError(playerId, err);
     }
 
+    // Tell the frontend client to start the game.
+    sendMessageToPlayer(playerId, {
+      resource: 'game',
+      command: 'startGame',
+      params: {
+        game: newGame
+      }
+    });
+
+    // Tell all other frontend clients that a new joinable game is available.
     for (const player of gameManager.players) {
       if (player.id !== playerId) {
         sendMessageToPlayer(player.id, {
@@ -67,14 +77,6 @@ exports.createBackendDispatcher = function(server) {
         });
       }
     }
-
-    sendMessageToPlayer(playerId, {
-      resource: 'game',
-      command: 'startGame',
-      params: {
-        game: newGame
-      }
-    });
   }
 
   function handleJoinGameCommand(gameId, playerId) {
@@ -87,6 +89,7 @@ exports.createBackendDispatcher = function(server) {
       return handleError(playerId, err);
     }
 
+    // Tell the frontend client to start the game.
     sendMessageToPlayer(playerId, {
       resource: 'game',
       command: 'startGame',
@@ -95,6 +98,7 @@ exports.createBackendDispatcher = function(server) {
       }
     });
 
+    // Tell all frontend clients that the game is no longer joinable.
     for (const player of gameManager.players) {
       sendMessageToPlayer(player.id, {
         resource: 'game',
@@ -116,6 +120,7 @@ exports.createBackendDispatcher = function(server) {
       return handleError(playerId, err);
     }
 
+    // Check the status of the game.
     let status;
     if (result.win) {
       status = 'win';
@@ -127,6 +132,7 @@ exports.createBackendDispatcher = function(server) {
       logger.info(`Game ${gameId} is a ${status}`);
     }
 
+    // Notify the frontend clients connected to the game of the new move and game status.
     for (const player of result.game.players) {
       sendMessageToPlayer(player.id, {
         resource: 'game',
@@ -151,6 +157,7 @@ exports.createBackendDispatcher = function(server) {
       return handleError(playerId, err);
     }
 
+    // Tell the frontend clients connected to the game to leave it.
     for (const player of result.game.players) {
       sendMessageToPlayer(player.id, {
         resource: 'game',
@@ -161,6 +168,7 @@ exports.createBackendDispatcher = function(server) {
       });
     }
 
+    // Tell all frontend clients that the game is no longer joinable.
     for (const player of gameManager.players) {
       sendMessageToPlayer(player.id, {
         resource: 'game',
@@ -177,11 +185,11 @@ exports.createBackendDispatcher = function(server) {
       case 'createGame':
         handleCreateGameCommand(currentPlayer.id);
         break;
-      case 'play':
-        handlePlayCommand(params.gameId, currentPlayer.id, params.col, params.row);
-        break;
       case 'joinGame':
         handleJoinGameCommand(params.gameId, currentPlayer.id);
+        break;
+      case 'play':
+        handlePlayCommand(params.gameId, currentPlayer.id, params.col, params.row);
         break;
       case 'leaveGame':
         handleLeaveGameCommand(params.gameId, currentPlayer.id);
@@ -224,12 +232,11 @@ exports.createBackendDispatcher = function(server) {
     });
 
     // Send currently joinable games to the client.
-    const currentGames = gameController.getJoinableGames();
     sendMessageToPlayer(newPlayer.id, {
       resource: 'game',
       command: 'addJoinableGames',
       params: {
-        games: currentGames
+        games: gameController.getJoinableGames()
       }
     });
 

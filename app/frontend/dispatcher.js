@@ -15,7 +15,8 @@ export function createFrontendDispatcher(viewManager) {
   let currentGame;
   let currentPlayer;
 
-  function handleError(message) {
+  function handleError(message, code) {
+    console.warn(`ERROR: received error code ${code} from backend`);
     viewManager.displayToast(message);
   }
 
@@ -44,7 +45,7 @@ export function createFrontendDispatcher(viewManager) {
     }));
   }
 
-  function onBoardClicked(ws, col, row) {
+  function onBoardCellClicked(ws, col, row) {
     ws.send(JSON.stringify({
       resource: 'game',
       command: 'play',
@@ -102,7 +103,7 @@ export function createFrontendDispatcher(viewManager) {
   function dispatchGameCommand(command, params) {
     switch (command) {
       case 'error':
-        handleError(`Game error: ${params.message}`);
+        handleError(params.message, params.code);
         break;
       case 'addJoinableGames':
         handleAddJoinableGamesCommand(params.games);
@@ -146,19 +147,19 @@ export function createFrontendDispatcher(viewManager) {
   const wsUrl = `${wsProtocol}://${window.location.hostname}:${window.location.port}`;
   const ws = new WebSocket(wsUrl);
 
-  ws.onopen = function() {
+  ws.addEventListener('open', function() {
     console.log(`Connected to WebSocket server at ${wsUrl}`);
 
     // Handle DOM events.
     viewManager.on('createGame', () => onCreateGameClicked(ws));
     viewManager.on('joinGame', gameId => onJoinGameClicked(ws, gameId));
-    viewManager.on('play', (col, row) => onBoardClicked(ws, col, row));
+    viewManager.on('play', (col, row) => onBoardCellClicked(ws, col, row));
     viewManager.on('leaveGame', () => onLeaveGameClicked(ws));
 
-    // Dispatch server messages.
-    ws.onmessage = function(message) {
+    // Dispatch backend messages.
+    ws.addEventListener('message', function(message) {
 
-      console.log(`Received message from server: ${message.data}`);
+      console.log(`Received message from the backend: ${message.data}`);
       const messageData = JSON.parse(message.data);
 
       /**
@@ -179,6 +180,6 @@ export function createFrontendDispatcher(viewManager) {
           dispatchPlayerCommand(messageData.command, messageData.params);
           break;
       }
-    };
-  };
+    });
+  });
 }
