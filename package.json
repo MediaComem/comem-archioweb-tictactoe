@@ -1,8 +1,9 @@
 {
-  "name": "comem-archioweb-tic-tac-toe",
+  "name": "comem-archioweb-tictactoe",
   "version": "1.0.0",
   "description": "An exercise to implement a real-time tic-tac-toe with WebSockets or the Web Application Messaging Protocol (WAMP).",
   "main": "app/backend/bin/www",
+  "private": true,
   "scripts": {
     "backend:watch": "nodemon",
     "build": "npm run frontend:build",
