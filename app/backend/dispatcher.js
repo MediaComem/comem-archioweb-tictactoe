@@ -4,7 +4,7 @@
  * @exports app/backend/dispatcher
  */
 const GameManager = require('../class/game-manager.class');
-const { createLogger } = require('./config');
+const { createLogger, namespace, secret } = require('./config');
 const GameController = require('./controller/game.controller');
 const PlayerController = require('./controller/player.controller');
 

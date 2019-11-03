@@ -40,6 +40,7 @@
     "concurrently": "^5.0.0",
     "css-loader": "^3.2.0",
     "doctoc": "^1.4.0",
+    "dotenv": "^8.2.0",
     "eslint": "^6.6.0",
     "eslint-plugin-sort-requires-by-path": "^1.0.2",
     "jsdoc": "^3.6.3",

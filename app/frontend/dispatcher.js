@@ -13,6 +13,9 @@ export function createFrontendDispatcher(viewManager) {
   // SETUP
   // =====
 
+  const namespace = TICTACTOE_NAMESPACE;
+  const secret = TICTACTOE_SECRET;
+
   // TODO: declare variables and generic functions if you need them
 
   /**

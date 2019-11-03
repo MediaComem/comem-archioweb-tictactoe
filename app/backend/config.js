@@ -3,9 +3,12 @@
  * environment if available.
  * @exports app/backend/config
  */
+const dotenv = require('dotenv');
 const { getLogger } = require('log4js');
 
 const logLevels = [ 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL' ];
+
+dotenv.config();
 
 /**
  * The current log level of the application. The higher (closer to
@@ -22,6 +25,15 @@ const logLevels = [ 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL' ];
 exports.logLevel = parseEnvEnum('TICTACTOE_LOG_LEVEL', logLevels, value => value.toUpperCase()) || 'DEBUG';
 
 /**
+ * Namespace to be used to avoid name collisions.
+ *
+ * <p>Customize it with the <code>$TICTACTOE_NAMESPACE</code> environment variable.</p>
+ *
+ * @type {string}
+ */
+exports.namespace = process.env.TICTACTOE_NAMESPACE || 'ch.comem.archioweb.tictactoe';
+
+/**
  * The port on which the application's server will listen to. Defaults to
  * <code>3000</code>.
  *
@@ -31,6 +43,15 @@ exports.logLevel = parseEnvEnum('TICTACTOE_LOG_LEVEL', logLevels, value => value
  * @type {number}
  */
 exports.port = parseEnvInt('TICTACTOE_PORT', 1, 65535) || parseEnvInt('PORT', 1, 65535) || 3000;
+
+/**
+ * Secret to be used for authentication.
+ *
+ * <p>Customize it with the <code>$TICTACTOE_SECRET</code> environment variable.</p>
+ *
+ * @type {string}
+ */
+exports.secret = process.env.TICTACTOE_SECRET;
 
 /**
  * Creates a named logger for the application.

@@ -1,3 +1,5 @@
+/.env*
+!/.env.sample
 /inventory*
 !/inventory.sample.yml
 /node_modules

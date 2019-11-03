@@ -109,10 +109,16 @@ must be deployed somewhere both the backend and frontend clients can reach it.
 
 ## Configuration
 
-Environment variable(s)      | Default value | Description
-:--------------------------- | :------------ | :---------------------------------------------------------------------------------------------------
-`$TICTACTOE_LOG_LEVEL`       | `DEBUG`       | The application's log level. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`.
-`$TICTACTOE_PORT` or `$PORT` | `3000`        | The port on which the backend server will listen to.
+This project uses [dotenv][dotenv], so you can also provide these environment
+variables by creating a `.env` file in this repository (it will be ignored). An
+example is provided in the `.env.sample` file.
+
+Environment variable(s)      | Default value                  | Description
+:--------------------------- | :----------------------------- | :---------------------------------------------------------------------------------------------------
+`$TICTACTOE_LOG_LEVEL`       | `DEBUG`                        | The application's log level. Possible values are `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`.
+`$TICTACTOE_NAMESPACE`       | `ch.comem.archioweb.tictactoe` | Namespace to be used to avoid name collisions.
+`$TICTACTOE_PORT` or `$PORT` | `3000`                         | The port on which the backend server will listen to.
+`$TICTACTOE_SECRET`          | *(none)*                       | Secret to be used for authentication.
 
 
 
@@ -137,6 +143,7 @@ Environment variable(s)      | Default value | Description
 
 [crossbar]: https://crossbar.io
 [crossbar-docker]: https://crossbar.io/docs/Getting-Started/#starting-a-crossbar-io-router
+[dotenv]: https://www.npmjs.com/package/dotenv
 [node]: https://nodejs.org
 [wamp]: https://wamp-proto.org
 [ws]: https://en.wikipedia.org/wiki/WebSocket
