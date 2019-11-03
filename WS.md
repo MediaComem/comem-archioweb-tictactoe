@@ -153,9 +153,11 @@ map player IDs to WebSocket clients:
 const clients = {};
 ```
 
-You now want to store WebSocket clients in this map as they connect. **Add the
-following code to the `wss.on('connection')` callback in the `COMMUNICATIONS`
-section**:
+Every time a client connects, you want to create a player and store the
+WebSocket client in the `clients` map. The provided `PlayerController` class has
+a [`createPlayer` method][player-controller-create-player] that will handle
+creating the player for you. **Add the following code to the
+`wss.on('connection')` callback in the `COMMUNICATIONS` section**:
 
 ```js
 wss.on('connection', function(ws) {
@@ -273,7 +275,7 @@ the developer console, select the request with the `websocket` type and open the
 ## Frontend: dispatch backend messages and store the created player
 
 The frontend must now be able to handle the `setPlayer` command. You will need
-to store the newly created player. Storing in memory is sufficient for the
+to store the newly created player. Storing it in memory is sufficient for the
 purposes of this exercise, so you can simply **add the following declaration to
 the `SETUP` section**:
 
@@ -400,8 +402,8 @@ ws.addEventListener('open', function() {
 ```
 
 Instead of writing the event handling code directly in the connection callback,
-it is good practice to dispatch that to a separate function. You must now add
-this `onCreateGameClicked` function.
+it is good practice to dispatch that to a separate function. You must now
+implement this `onCreateGameClicked` function.
 
 The backend server cannot detect clicks in the frontend client running in the
 browser, so you need to tell the backend that a new tic-tac-toe game must be
@@ -743,8 +745,9 @@ appear as the client first connects**.
 ## Frontend: request to join a game
 
 For your opponent to join the game, he or she will click on the Join Game
-button. **Add the following code to the `ws.addEventListener('open')` callback**
-to listen to that event:
+button. The `ViewManager` will emit a `joinGame` event with the game ID when
+that occurs. **Add the following code to the `ws.addEventListener('open')`
+callback** to listen to that event:
 
 ```js
 ws.addEventListener('open', function() {
@@ -789,10 +792,13 @@ case 'joinGame':
   break;
 ```
 
+The provided `GameController` has a [`joinGame`
+method][game-controller-join-game] you can use to make the player join the game.
+
 When an opponent joins a game, 2 things need to happen: the game interface needs
 to show up for the opponent, and the game needs to be removed from the list of
 joinable games for other players. You already have the `startGame` command for
-the first, but you will need a new `removeJoinableGame` command for the second.
+the former, but you will need a new `removeJoinableGame` command for the latter.
 
 **Add the following function to the `GAME MANAGEMENT` section**:
 
@@ -834,7 +840,7 @@ function handleJoinGameCommand(gameId, playerId) {
 }
 ```
 
-Refresh both your browser windows and **you should now be able to start a game
+Refresh both your browser windows and **you should now be able to create a game
 in window 1 and join it in window 2**.
 
 
@@ -853,7 +859,7 @@ case 'removeJoinableGame':
 
 The provided `ViewManager` class has a [`removeJoinable`
 game][view-manager-remove-joinable-game] that does the opposite of the
-`addJoinableGame` method: it removes it from the list. **Add the following
+`addJoinableGame` method: it removes a game from the list. **Add the following
 function to the `GAME MANAGEMENT` section**:
 
 ```js
@@ -881,8 +887,8 @@ The rest of the functionality is yours to implement.
 There are 2 DOM events that are not yet handled:
 
 * During a game, the `play` event is emitted when the player clicks on the
-  board. The column (0-2 from left to right) and row (0-2 from top to bottom) of
-  the board cell are provided.
+  board. The column (0-2 from left to right) and row (0-2 from top to bottom)
+  identifying the board cell are provided.
 
   You need to listen to this event and handle it with a new game management
   function:
@@ -916,6 +922,8 @@ TOLINK: game-error
 TOLINK: game-controller
 TOLINK: game-controller-create-new-game
 TOLINK: game-controller-get-joinable-games
+TOLINK: game-controller-join-game
+TOLINK: player-controller-create-player
 TOLINK: view-manager-add-joinable-game
 TOLINK: view-manager-display-game
 TOLINK: view-manager-on
