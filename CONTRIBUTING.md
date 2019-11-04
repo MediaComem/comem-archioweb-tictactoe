@@ -156,6 +156,7 @@ Environment variable(s)      | Default value                  | Description
 * Avoid page flickering on load (hide all)
 * Add browser auto-refresh for development
 * Fix memory leaks (games accumulate in the game manager)
+* Handle client disconnects
 * Improve ID generation
 * Show who is currently playing
 * Show who has won (with more than a transient notification)
