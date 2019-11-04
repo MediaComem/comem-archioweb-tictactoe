@@ -1,4 +1,4 @@
-# WebSockets & WAMP Exercise
+# Web-Oriented Architecture Tic-Tac-Toe Exercise
 
 This is an exercise for the [COMEM+ Web-Oriented Architecture Course][course].
 
@@ -11,6 +11,7 @@ This is an exercise for the [COMEM+ Web-Oriented Architecture Course][course].
   - [The goal](#the-goal)
   - [Getting started](#getting-started)
   - [Implement real-time communications](#implement-real-time-communications)
+- [Resources](#resources)
 - [Contributing](#contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -60,13 +61,13 @@ Use one of the two suggested technologies to make the game functional.
 Clone this repository:
 
 ```bash
-$> git clone https://github.com/MediaComem/comem-archioweb-tic-tac-toe
+$> git clone https://github.com/MediaComem/comem-archioweb-tictactoe
 ```
 
 Move into the repository and install dependencies:
 
 ```bash
-$> cd comem-archioweb-tic-tac-toe
+$> cd comem-archioweb-tictactoe
 $> npm ci
 ```
 
@@ -78,12 +79,26 @@ will still have to refresh your browser window**):
 $> npm run start:watch
 ```
 
+Visit http://localhost:3000 to view the application. Of course, the game will
+not be functional since it is missing any kind of communication between backend
+and frontend.
+
+> If port 3000 is already taken, you may change it with the `$PORT` environment
+> variable when running the command: `PORT=4000 npm run start:watch`.
+
 ### Implement real-time communications
 
 Follow one of these guides:
 
 * [Implement communications with WebSockets](WS.md)
 * [Implement communication with the Web Application Messaging Protocol (WAMP)](WAMP.md)
+
+
+
+## Resources
+
+* [Demo of the WebSockets implementation][demo]
+* [Source code documentation][docs]
 
 
 
@@ -94,6 +109,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 [course]: https://github.com/MediaComem/comem-archioweb
+[demo]: https://comem-archioweb-tictactoe.herokuapp.com/
+[docs]: https://mediacomem.github.io/comem-archioweb-tictactoe/
 [express]: https://expressjs.com
 [jquery]: https://jquery.com
 [node]: https://nodejs.org
