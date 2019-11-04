@@ -1,6 +1,6 @@
 FROM node:12.13.0-alpine
 
-LABEL name="comem-archioweb-tic-tac-toe" \
+LABEL name="comem-archioweb-tictactoe" \
       version="1.0.0" \
       description="A container for a real-time Tic-Tac-Toe application"
 

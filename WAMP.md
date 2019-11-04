@@ -21,9 +21,9 @@ backend and frontend.
 - [Backend: publish an event to notify players that a new game can be joined](#backend-publish-an-event-to-notify-players-that-a-new-game-can-be-joined)
 - [Frontend: subscribe to the event to display new joinable games](#frontend-subscribe-to-the-event-to-display-new-joinable-games)
 - [Backend: register a procedure to join a game](#backend-register-a-procedure-to-join-a-game)
-- [Frontend: call the `joinGame` procedure when the user clicks the Join Game button](#frontend-call-the-joingame-procedure-when-the-user-clicks-the-join-game-button)
-- [Backend: publish the `joinableGameRemoved` event when a game starts](#backend-publish-the-joinablegameremoved-event-when-a-game-starts)
-- [Frontend: subscribe to the `joinableGameRemoved` event](#frontend-subscribe-to-the-joinablegameremoved-event)
+- [Frontend: call the procedure to join a game when the user clicks the Join Game button](#frontend-call-the-procedure-to-join-a-game-when-the-user-clicks-the-join-game-button)
+- [Backend: publish an event to notify players that a game can no longer be joined](#backend-publish-an-event-to-notify-players-that-a-game-can-no-longer-be-joined)
+- [Frontend: subscribe to the event to remove the joinable game from the list](#frontend-subscribe-to-the-event-to-remove-the-joinable-game-from-the-list)
 - [Backend & frontend: implement the rest](#backend--frontend-implement-the-rest)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -77,7 +77,7 @@ repository with the following contents (replace `changeme` with the actual
 secret):
 
 ```
-TICTACTOE_WAMP_AUTH_SECRET=changeme
+TICTACTOE_SECRET=changeme
 ```
 
 > The value of this variable is already available in both the backend and
@@ -133,7 +133,7 @@ to a router][autobahn-connections]. **Add the following code to the
 
 const connection = new autobahn.Connection({
   url: 'wss://wamp.example.com/ws',
-  realm: 'tictactoe'
+  realm: 'tictactoe',
   authid: 'tictactoe',
   authmethods: [ 'ticket' ],
   onchallenge: function() {
@@ -142,6 +142,9 @@ const connection = new autobahn.Connection({
 });
 
 connection.onopen = function(session) {
+  // Use this on the frontend:
+  console.log('Connection to WAMP router established');
+  // Use this on the backend:
   logger.info('Connection to WAMP router established');
 };
 
@@ -335,8 +338,11 @@ connection.onopen = function(session) {
 
 In order for this call to work, you also need to implement the
 `onJoinableGameAdded` function to add games to the displayed list of joinable
-games in the interface. **Add the following code to the `GAME MANAGEMENT`
-section**:
+games. The `ViewManager` class has an [`addJoinableGame`
+method][view-manager-add-joinable-game] that can be used to display a new game
+in the interface.
+
+**Add the following code to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -346,6 +352,8 @@ function onJoinableGameAdded(game) {
   viewManager.addJoinableGame(game);
 }
 ```
+
+You cannot see this method work yet, but it will be useful later.
 
 Refresh your browser and you should see the procedure being called:
 
@@ -447,9 +455,8 @@ function handleError(err) {
 
 ## Frontend: call the game creation procedure when the user clicks on the Create Game button
 
-The backend/frontend interaction you implemented so far has been automatic and
-transparent, not visible to the user. It is time to start reacting to user
-actions.
+The backend/frontend interaction you implemented so far has been invisible to
+the user. It is time to start reacting to user interaction.
 
 If you look at the documentation of the `ViewManager` class, you will see that
 emit events and that you can [listen to these events with its `on`
@@ -577,21 +584,8 @@ connection.onopen = function(session) {
 };
 ```
 
-The `ViewManager` class has an [`addJoinableGame`
-method][view-manager-add-joinable-game] that can be used to display a new game
-in the interface. **Add the following function to the `GAME MANAGEMENT`
-section** to display the games notified in the `joinableGameAdded` topic:
-
-```js
-// GAME MANAGEMENT
-// ===============
-
-// <PREVIOUS CODE HERE...>
-
-function onJoinableGameAdded(game) {
-  viewManager.addJoinableGame(game);
-}
-```
+You already have the `onJoinableGameAdded` function from earlier when you
+initialized the player.
 
 Refresh both your browser windows. Create a game in window 1 and **you should
 see it appear in real time in window 2**.
@@ -644,7 +638,7 @@ The `joinGame` procedure is now ready to be called by other WAMP clients.
 
 
 
-## Frontend: call the `joinGame` procedure when the user clicks the Join Game button
+## Frontend: call the procedure to join a game when the user clicks the Join Game button
 
 For your opponent to join the game, he or she will click on the Join Game
 button. The `ViewManager` will emit a `joinGame` event with the game ID when
@@ -681,7 +675,7 @@ in window 1 and join it in window 2**.
 
 
 
-## Backend: publish the `joinableGameRemoved` event when a game starts
+## Backend: publish an event to notify players that a game can no longer be joined
 
 Just as you published an event earlier to notify players that a joinable game
 was added, you must now notify other players that a game is no longer joinable
@@ -706,7 +700,7 @@ are no longer joinable.
 
 
 
-## Frontend: subscribe to the `joinableGameRemoved` event
+## Frontend: subscribe to the event to remove the joinable game from the list
 
 **Add the following code to `connection.onopen` callback in the `COMMUNICATIONS`
 section** to subscribe to the new `joinableGameRemoved` topic on the frontend:
@@ -777,16 +771,6 @@ actions have been performed.
 
 
 
-TOLINK: game-controller
-TOLINK: game-controller-create-new-game
-TOLINK: game-controller-join-game
-TOLINK: game-error
-TOLINK: player-controller-create-player
-TOLINK: view-manager-add-joinable-game
-TOLINK: view-manager-display-game
-TOLINK: view-manager-on
-TOLINK: view-manager-remove-joinable-game
-
 [autobahn]: https://github.com/crossbario/autobahn-js
 [autobahn-call]: https://github.com/crossbario/autobahn-js/blob/master/doc/reference.md#call
 [autobahn-connections]: https://github.com/crossbario/autobahn-js/blob/master/doc/reference.md#connections
@@ -796,6 +780,15 @@ TOLINK: view-manager-remove-joinable-game
 [crossbar-auth-ticket]: https://crossbar.io/docs/Ticket-Authentication/
 [crossbar-docker]: https://crossbar.io/docs/Getting-Started/#starting-a-crossbar-io-router
 [dotenv]: https://www.npmjs.com/package/dotenv
+[game-controller]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html
+[game-controller-create-new-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html#createNewGame
+[game-controller-join-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameController.html#joinGame
+[game-error]: https://mediacomem.github.io/comem-archioweb-tictactoe/GameError.html
+[player-controller-create-player]: https://mediacomem.github.io/comem-archioweb-tictactoe/PlayerController.html#createPlayer
+[view-manager-add-joinable-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#addJoinableGame
+[view-manager-display-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#displayGame
+[view-manager-on]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#on
+[view-manager-remove-joinable-game]: https://mediacomem.github.io/comem-archioweb-tictactoe/ViewManager.html#removeJoinableGame
 [promise]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [reverse-dns]: https://en.wikipedia.org/wiki/Reverse_domain_name_notation
 [wamp]: https://wamp-proto.org
