@@ -77,7 +77,7 @@ repository with the following contents (replace `changeme` with the actual
 secret):
 
 ```
-TICTACTOE_WAMP_AUTH_SECRET=changeme
+TICTACTOE_SECRET=changeme
 ```
 
 > The value of this variable is already available in both the backend and
@@ -133,7 +133,7 @@ to a router][autobahn-connections]. **Add the following code to the
 
 const connection = new autobahn.Connection({
   url: 'wss://wamp.example.com/ws',
-  realm: 'tictactoe'
+  realm: 'tictactoe',
   authid: 'tictactoe',
   authmethods: [ 'ticket' ],
   onchallenge: function() {
@@ -142,6 +142,9 @@ const connection = new autobahn.Connection({
 });
 
 connection.onopen = function(session) {
+  // Use this on the frontend:
+  console.log('Connection to WAMP router established');
+  // Use this on the backend:
   logger.info('Connection to WAMP router established');
 };
 
@@ -335,8 +338,11 @@ connection.onopen = function(session) {
 
 In order for this call to work, you also need to implement the
 `onJoinableGameAdded` function to add games to the displayed list of joinable
-games in the interface. **Add the following code to the `GAME MANAGEMENT`
-section**:
+games. The `ViewManager` class has an [`addJoinableGame`
+method][view-manager-add-joinable-game] that can be used to display a new game
+in the interface.
+
+**Add the following code to the `GAME MANAGEMENT` section**:
 
 ```js
 // GAME MANAGEMENT
@@ -346,6 +352,8 @@ function onJoinableGameAdded(game) {
   viewManager.addJoinableGame(game);
 }
 ```
+
+You cannot see this method work yet, but it will be useful later.
 
 Refresh your browser and you should see the procedure being called:
 
@@ -576,21 +584,8 @@ connection.onopen = function(session) {
 };
 ```
 
-The `ViewManager` class has an [`addJoinableGame`
-method][view-manager-add-joinable-game] that can be used to display a new game
-in the interface. **Add the following function to the `GAME MANAGEMENT`
-section** to display the games notified in the `joinableGameAdded` topic:
-
-```js
-// GAME MANAGEMENT
-// ===============
-
-// <PREVIOUS CODE HERE...>
-
-function onJoinableGameAdded(game) {
-  viewManager.addJoinableGame(game);
-}
-```
+You already have the `onJoinableGameAdded` function from earlier when you
+initialized the player.
 
 Refresh both your browser windows. Create a game in window 1 and **you should
 see it appear in real time in window 2**.
