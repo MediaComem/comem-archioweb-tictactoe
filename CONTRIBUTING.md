@@ -39,8 +39,8 @@ read the [README.md](README.md).
 Clone the repository and install dependencies:
 
 ```bash
-$> git clone git@github.com:MediaComem/comem-archioweb-tic-tac-toe.git
-$> cd comem-archioweb-tic-tac-toe
+$> git clone git@github.com:MediaComem/comem-archioweb-tictactoe.git
+$> cd comem-archioweb-tictactoe
 $> npm ci
 ```
 
@@ -69,7 +69,7 @@ Visit [http://localhost:3000](http://localhost:3000).
 
 ```bash
 $> npm run docker:build
-$> docker run comem-archioweb-tic-tac-toe -p 3000:3000
+$> docker run comem-archioweb-tictactoe -p 3000:3000
 ```
 
 Visit [http://localhost:3000](http://localhost:3000).

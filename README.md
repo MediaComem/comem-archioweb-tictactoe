@@ -61,13 +61,13 @@ Use one of the two suggested technologies to make the game functional.
 Clone this repository:
 
 ```bash
-$> git clone https://github.com/MediaComem/comem-archioweb-tic-tac-toe
+$> git clone https://github.com/MediaComem/comem-archioweb-tictactoe
 ```
 
 Move into the repository and install dependencies:
 
 ```bash
-$> cd comem-archioweb-tic-tac-toe
+$> cd comem-archioweb-tictactoe
 $> npm ci
 ```
 
