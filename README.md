@@ -79,6 +79,13 @@ will still have to refresh your browser window**):
 $> npm run start:watch
 ```
 
+Visit http://localhost:3000 to view the application. Of course, the game will
+not be functional since it is missing any kind of communication between backend
+and frontend.
+
+> If port 3000 is already taken, you may change it with the `$PORT` environment
+> variable when running the command: `PORT=4000 npm run start:watch`.
+
 ### Implement real-time communications
 
 Follow one of these guides:

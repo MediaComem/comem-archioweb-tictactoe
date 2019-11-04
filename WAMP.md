@@ -447,9 +447,8 @@ function handleError(err) {
 
 ## Frontend: call the game creation procedure when the user clicks on the Create Game button
 
-The backend/frontend interaction you implemented so far has been automatic and
-transparent, not visible to the user. It is time to start reacting to user
-actions.
+The backend/frontend interaction you implemented so far has been invisible to
+the user. It is time to start reacting to user interaction.
 
 If you look at the documentation of the `ViewManager` class, you will see that
 emit events and that you can [listen to these events with its `on`

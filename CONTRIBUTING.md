@@ -157,6 +157,7 @@ Environment variable(s)      | Default value                  | Description
 * Fix memory leaks (games accumulate in the game manager)
 * Improve ID generation
 * Show who is currently playing
+* Show who has won (with more than a transient notification)
 * Uglify client code & add source maps
 * Document jsdoc usage
 * Document npm scripts

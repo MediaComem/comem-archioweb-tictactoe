@@ -136,7 +136,7 @@ has successfully opened the WebSocket connection.
 // <PREVIOUS CODE HERE...>
 
 ws.addEventListener('open', function() {
-  console.log(`Connected to WebSocket server at ${WS_URL}`);
+  console.log(`Connected to WebSocket server at ${wsUrl}`);
 });
 ```
 
@@ -398,9 +398,8 @@ developer console**.
 
 ## Frontend: implement the Create Game button
 
-The backend/frontend interaction you implemented so far has been automatic and
-transparent, not visible to the user. It is time to start reacting to user
-actions.
+The backend/frontend interaction you implemented so far has been invisible to
+the user. It is time to start reacting to user interaction.
 
 If you look at the documentation of the `ViewManager` class, you will see that
 emit events and that you can [listen to these events with its `on`
@@ -590,8 +589,18 @@ function handleError(playerId, err) {
 ## Frontend: display started games
 
 Two new commands are now being sent from the backend to the frontend:
-`startGame` and `error`. **Add the following code to the `GAME MANAGEMENT`
-section** to dispatch them:
+`startGame` and `error`. In order to dispatch them to the correct handlers,
+**add the following case to the switch in the `ws.addEventListener('message')`
+callback in the `COMMUNICATIONS` section**:
+
+```js
+case 'game':
+  dispatchGameCommand(messageData.command, messageData.params);
+  break;
+```
+
+**Add the following code to the `GAME MANAGEMENT` section** to implement the
+`dispatchGameCommand` function:
 
 ```js
 // GAME MANAGEMENT
