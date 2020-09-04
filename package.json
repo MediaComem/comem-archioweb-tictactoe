@@ -54,7 +54,7 @@
     "eslint": "^6.6.0",
     "eslint-plugin-sort-requires-by-path": "^1.0.2",
     "jsdoc": "^3.6.3",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "nodemon": "^1.19.4",
     "onchange": "^6.1.0",
     "sass-loader": "^8.0.0",
